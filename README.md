@@ -3,8 +3,13 @@ Bryan Melendez \
 Matthew Quach \
 Aileen Kim
 
+### Instruction
+- run ```source setup_env.sh```
+
 ### Dependencies
-- idk yet
+- opencv
+- matplotlib
+- numpy
 
 ### Development
 - Demo is on branch
