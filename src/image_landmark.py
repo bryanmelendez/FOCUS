@@ -2,7 +2,8 @@ import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 
-model_path = './face_landmarker.task'
+IMAGE_PATH = 'images/bryan.png'
+model_path = 'models/face_landmarker.task'
 
 BaseOptions = mp.tasks.BaseOptions
 FaceLandmarker = mp.tasks.vision.FaceLandmarker
@@ -14,7 +15,7 @@ options = FaceLandmarkerOptions(
     running_mode=VisionRunningMode.IMAGE)
 
 # Load the input image from an image file.
-mp_image = mp.Image.create_from_file('assets/bryan.png')
+mp_image = mp.Image.create_from_file(IMAGE_PATH)
 
 # The landmarker is initialized. Use it here.
 with FaceLandmarker.create_from_options(options) as landmarker:

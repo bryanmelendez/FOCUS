@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 import time
 
-model_path = '/Users/bryan/projects/focus/blaze_face_short_range.tflite'
+model_path = 'models/blaze_face_short_range.tflite'
 
 BaseOptions = mp.tasks.BaseOptions
 FaceDetector = mp.tasks.vision.FaceDetector

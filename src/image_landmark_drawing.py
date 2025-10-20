@@ -8,7 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 
-IMAGE_PATH = 'assets/sam.jpg'
+model_path = 'models/face_landmarker.task'
+
+IMAGE_PATH = 'images/matthew.jpg'
+# IMAGE_PATH = 'images/bryan.png'
 
 def draw_landmarks_on_image(rgb_image, detection_result):
   face_landmarks_list = detection_result.face_landmarks
@@ -53,7 +56,7 @@ def draw_landmarks_on_image(rgb_image, detection_result):
     return cv2.cvtColor(annotated_image, cv2.COLOR_BGR2RGB)  # Convert back to RGB for matplotlib
 
 # STEP 2: Create an FaceLandmarker object.
-base_options = python.BaseOptions(model_asset_path='face_landmarker.task')
+base_options = python.BaseOptions(model_asset_path=model_path)
 options = vision.FaceLandmarkerOptions(base_options=base_options,
                                        output_face_blendshapes=True,
                                        output_facial_transformation_matrixes=True,

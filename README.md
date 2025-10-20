@@ -16,7 +16,7 @@ Aileen Kim
 ```demo```
 
 ### TODO
-- [ ] add mediapipe to virtual environment
+- [ ] lock the python version
 
 ### Resources
 - https://ai.google.dev/edge/mediapipe/solutions/vision/pose_landmarker
