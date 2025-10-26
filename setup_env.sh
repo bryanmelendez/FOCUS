@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e  # exit on error
 
 # Create venv if it doesn't exist
 if [ ! -d ".venv" ]; then
