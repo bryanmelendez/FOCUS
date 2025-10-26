@@ -10,6 +10,7 @@ https://docs.google.com/document/d/1MGbXtYIxtO_Ngv6nXu83LEVJaTslGELuwQzDdMLm7g0/
 ![alt text](assets/code_development_structure.drawio.png)
 
 ### Instruction
+- install python 3.12 ```brew install python@3.12```
 - run ```source setup_env.sh``` to setup the python virtual environment
 - run ```source .venv/bin/activate``` if venv did not activate for some reason
 - environment should be set up now

@@ -2,6 +2,7 @@ from face_detection import FaceDetector
 
 def main():
     face_detector = FaceDetector()
+    face_detector.test()
 
 if __name__ == "__main__":
     print("FOCUS: Facial-Orientation and Concentration Understanding System")
