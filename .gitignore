@@ -1,4 +1,3 @@
 .venv
 /images
-blaze_face_short_range.tflite
-face_landmarker.task
+__pycache__
