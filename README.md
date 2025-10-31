@@ -25,7 +25,7 @@ https://docs.google.com/document/d/1MGbXtYIxtO_Ngv6nXu83LEVJaTslGELuwQzDdMLm7g0/
 - then everyone else on the team should run ```./setup_env.sh``` again
 
 ### Development Rules
-- When implementing a new feature, make a new branch and name it after the feature you are developing
+- When implementing a new feature, make a new branch and name it ```feature/<name of feature>```
 - When it is done and tested, merge it into develop (tell me if you don't know how to do this or ask chatgpt)
 - Only merge anything onto ```main``` if we have discussed it and decide that it is okay
 
