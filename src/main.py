@@ -41,14 +41,17 @@ def main():
                 # Create MediaPipe Image from cv2 frame
                 mp_image = face_detector.create_mediapipe_image(frame)
                 results = face_detector.get_landmarks(mp_image)
-                print('face landmarker result: {}'.format(results))
+                face_landmarks = results.face_landmarks[0]
+                # print('face landmarker result: {}'.format(results)) # uncomment this if you want to see the full landmarks data
 
                 # ===================================================
                 # NOTE - this is where you would call the algorithms
 
-
-
-
+                # NOTE: Example - remove this later
+                nose_tip = face_landmarks[4]
+                print(f"Nose tip - x: {nose_tip.x}, y: {nose_tip.y}, z: {nose_tip.z}")
+                top_of_forehead = face_landmarks[10]
+                print(f"Top of forehead - x: {top_of_forehead.x}, y: {top_of_forehead.y}, z: {top_of_forehead.z}")
 
                 # ===================================================
 

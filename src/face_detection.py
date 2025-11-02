@@ -161,7 +161,7 @@ class FaceDetector: # TODO reanme this because it conflicts with mediapipe FaceD
 
         detection_result = detector.detect(mp_image)
 
-        return detection_result
+        return detection_result 
 
     def create_mediapipe_image(self, bgr_image):
         # Convert BGR to RGB
