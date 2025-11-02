@@ -41,10 +41,3 @@ class Logger:
 
     def debug(self, message):
         self.log(f"DEBUG: {message}", "BLUE")
-    
-"""
-
-TODO:
-- setup data structure for csv fields (potentially make this a separate class)
-
-"""
