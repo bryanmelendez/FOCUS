@@ -1,4 +1,5 @@
 from face_detection import FaceDetector
+from landmark_processing import LandmarkProcessor
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -6,6 +7,7 @@ from time import time, sleep
 
 def main():
     face_detector = FaceDetector()
+    landmark_processor = LandmarkProcessor()
     # face_detector.run_detection()
     # face_detector.get_landmarks_looped()
 
@@ -46,12 +48,19 @@ def main():
 
                 # ===================================================
                 # NOTE - this is where you would call the algorithms
+                pose_results = landmark_processor.process_frame(face_landmarks, frame.shape)
+                head_pose = pose_results["head_pose"]
 
+                if head_pose:
+                    print(f"Pitch: {head_pose['pitch']:.2f}, "
+                          f"Yaw: {head_pose['yaw']:.2f}, "
+                          f"Roll: {head_pose['roll']:.2f}")
+                    
                 # NOTE: Example - remove this later
-                nose_tip = face_landmarks[4]
-                print(f"Nose tip - x: {nose_tip.x}, y: {nose_tip.y}, z: {nose_tip.z}")
-                top_of_forehead = face_landmarks[10]
-                print(f"Top of forehead - x: {top_of_forehead.x}, y: {top_of_forehead.y}, z: {top_of_forehead.z}")
+                #nose_tip = face_landmarks[4]
+                #print(f"Nose tip - x: {nose_tip.x}, y: {nose_tip.y}, z: {nose_tip.z}")
+                #top_of_forehead = face_landmarks[10]
+                #print(f"Top of forehead - x: {top_of_forehead.x}, y: {top_of_forehead.y}, z: {top_of_forehead.z}")
 
                 # ===================================================
 
