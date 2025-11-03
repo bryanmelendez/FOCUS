@@ -15,7 +15,8 @@ class Logger:
         if not os.path.exists('logs'):
             os.makedirs('logs')
 
-        self.log_file = f"logs/{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}_execution.log"
+        self.log_path = f"logs/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}"
+        self.log_file = f"{self.log_path}/execution.log"
         os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
 
     def log(self, message, color=None):

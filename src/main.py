@@ -3,9 +3,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import cv2
 from time import time, sleep
+from datetime import datetime
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.logger import Logger
 
 def main():
     face_detector = FaceDetector()
+    logger = Logger()
+    frames_dir = f"{logger.log_path}/frames"
+    os.makedirs(frames_dir, exist_ok=True)
+    # NOTE - for now either mark this true or false
+    save_frames = True 
+
     # face_detector.run_detection()
     # face_detector.get_landmarks_looped()
 
@@ -41,6 +51,10 @@ def main():
                 # Create MediaPipe Image from cv2 frame
                 mp_image = face_detector.create_mediapipe_image(frame)
                 results = face_detector.get_landmarks(mp_image)
+                if results is None or len(results.face_landmarks) == 0:
+                    logger.warning("No face landmarks detected")
+                    continue
+
                 face_landmarks = results.face_landmarks[0]
                 # print('face landmarker result: {}'.format(results)) # uncomment this if you want to see the full landmarks data
 
@@ -49,9 +63,9 @@ def main():
 
                 # NOTE: Example - remove this later
                 nose_tip = face_landmarks[4]
-                print(f"Nose tip - x: {nose_tip.x}, y: {nose_tip.y}, z: {nose_tip.z}")
+                logger.log(f"Nose tip - x: {nose_tip.x}, y: {nose_tip.y}, z: {nose_tip.z}")
                 top_of_forehead = face_landmarks[10]
-                print(f"Top of forehead - x: {top_of_forehead.x}, y: {top_of_forehead.y}, z: {top_of_forehead.z}")
+                logger.log(f"Top of forehead - x: {top_of_forehead.x}, y: {top_of_forehead.y}, z: {top_of_forehead.z}")
 
                 # ===================================================
 
@@ -59,6 +73,11 @@ def main():
 
                 # Annotate the image with the detected landmarks
                 annotated_image = face_detector.draw_landmarks_on_image(mp_image.numpy_view(), results)
+
+                # save the image to logs
+                if save_frames:
+                    frame_filename = f"{frames_dir}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.jpg"
+                    cv2.imwrite(frame_filename, frame)
 
                 plt.imshow(annotated_image)
                 plt.axis('off')
