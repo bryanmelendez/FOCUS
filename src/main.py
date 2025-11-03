@@ -1,4 +1,5 @@
 from face_detection import FaceDetector
+from landmark_processing import LandmarkProcessor
 import numpy as np
 import matplotlib.pyplot as plt
 import cv2
@@ -8,6 +9,7 @@ def main():
     face_detector = FaceDetector()
     # face_detector.run_detection()
     # face_detector.get_landmarks_looped()
+    landmark_processor = LandmarkProcessor()
 
     cap = cv2.VideoCapture(0)  # 0 is usually the built-in webcam
         
@@ -52,6 +54,14 @@ def main():
                 print(f"Nose tip - x: {nose_tip.x}, y: {nose_tip.y}, z: {nose_tip.z}")
                 top_of_forehead = face_landmarks[10]
                 print(f"Top of forehead - x: {top_of_forehead.x}, y: {top_of_forehead.y}, z: {top_of_forehead.z}")
+
+                # EAR FUNCTION
+                left_ear, right_ear, ear_avg = landmark_processor.compute_EAR(face_landmarks)
+                print(f"EAR: L = {left_ear:.3f}, R = {right_ear:.3f}, Avg = {ear_avg:.3f}")
+
+                # MAR FUNCTION
+                mar = landmark_processor.compute_MAR(face_landmarks)
+                print(f"MAR: {mar:.3f}")
 
                 # ===================================================
 
