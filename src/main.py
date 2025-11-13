@@ -58,6 +58,7 @@ def main():
                     continue
 
                 face_landmarks = results.face_landmarks[0]
+
                 # print('face landmarker result: {}'.format(results)) # uncomment this if you want to see the full landmarks data
 
                 # ===================================================
