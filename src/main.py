@@ -43,7 +43,10 @@ def main():
                 # Create MediaPipe Image from cv2 frame
                 mp_image = face_detector.create_mediapipe_image(frame)
                 results = face_detector.get_landmarks(mp_image)
+                if results is None or len(results.face_landmarks) == 0:
+                    continue
                 face_landmarks = results.face_landmarks[0]
+
                 # print('face landmarker result: {}'.format(results)) # uncomment this if you want to see the full landmarks data
 
                 # ===================================================
