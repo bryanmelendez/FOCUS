@@ -1,10 +1,39 @@
 import cv2
 import numpy as np
+import time
+from collections import deque
+from enum import Enum
+
+# Define an enumeration for different states of attention
+class state(Enum):
+    DROWSY = 1
+    DISTRACTED = 2
+    ATTENTIVE = 3
 
 class LandmarkProcessor:
     def __init__(self):
-        # idk
-        pass
+        self.funct_time = 60 # second *** REMEMBER TO CHANGE !!! ***
+        # EAR values
+        self.closed_start_time = None
+        self.isClosed = False
+        self.closed_time_minumum = 4 # minimum of 4 seconds to be drowsy
+        # PERCLOS values
+        self.avg_EAR_history = deque() # holds timestamp and avg EAR value
+        self.closed_maximum = 0.25 # EAR is less than this -> eye closed
+        # MAR/YF values
+        self.MAR_minimum = 0.2 # MAR higher than this -> mouth open
+        self.MAR_history = deque() # holds timestamp and MAR value
+        self.yawn_history = deque() # holds yawns 
+        self.yawn_minimum = 3 # minimum of 4 seconds for an open mouth to be consired a yawn
+        self.isYawning = False
+        self.yawn_start_time = None
+        # SoA
+        self.currentState = self.prevState = state.ATTENTIVE
+        self.state_start_time = None
+        self.drowsy_alert_time = 5 # seconds
+        self.distracted_alert_time = 5 # seconds
+        # if want to see trend at end or in email summary or something :p
+        self.SoA_history = []
     
     def compute_EAR(self, landmarks):
         # define landmarks
@@ -50,6 +79,56 @@ class LandmarkProcessor:
 
         return mar
 
+    def compute_PERCLOS(self, landmarks):
+        current_time = time.time()
+        closed_frames = 0
+        total_frames = 0
+
+        _, _, avg_EAR = self.compute_EAR(landmarks)
+        self.avg_EAR_history.append((current_time, avg_EAR))
+        # past 60 seconds, start cycling
+        while current_time - self.avg_EAR_history[0][0] > self.funct_time:
+            self.avg_EAR_history.popleft()
+        total_frames = len(self.avg_EAR_history)
+        # compute PERCLOS for current samples
+        for (_, ear_value) in self.avg_EAR_history:
+            if ear_value <= self.closed_maximum:
+                closed_frames += 1
+
+        if total_frames < self.funct_time:
+            return 0 # wait for full time to start - CHANGE ?
+        else:
+            PERCLOS = (closed_frames/total_frames)
+        return PERCLOS
+    
+    def compute_yawn_freq(self, landmarks):
+        current_time = time.time()
+
+        MAR = self.compute_MAR(landmarks)
+        self.MAR_history.append((current_time, MAR))
+
+        # past 60 seconds, start cycling
+        while current_time - self.MAR_history[0][0] > self.funct_time:
+            self.MAR_history.popleft()
+
+        if MAR > self.MAR_minimum:
+            if not self.isYawning:
+                self.yawn_start_time = time.time()
+                self.isYawning = True
+        else:
+            if self.isYawning:
+                # check mouth open time
+                duration = current_time - self.yawn_start_time
+                if duration >= self.yawn_minimum: # longer than 4 seconds
+                    self.yawn_history.append(current_time)
+                self.isYawning = False
+        # remove old yawns after 60s
+        while self.yawn_history and current_time - self.yawn_history[0] > self.funct_time:
+            self.yawn_history.popleft()
+        
+        yawn_freq = len(self.yawn_history)
+        return yawn_freq
+
     def compute_head_pose(self, landmarks, frame_shape):
         # todo
         pass
@@ -59,13 +138,56 @@ class LandmarkProcessor:
         pass
 
     def process_frame(self, landmarks):
-        EAR = self.compute_EAR(landmarks)
-        MAR = self.compute_MAR(landmarks)
-        head_pose = self.compute_head_pose(landmarks)
-        gaze = self.compute_gaze(landmarks)
+        PERCLOS = self.compute_PERCLOS(landmarks)
+        YF = self.compute_yawn_freq(landmarks)
+        #head_pose = self.compute_head_pose(landmarks)
+        #gaze = self.compute_gaze(landmarks)
 
-        results = {
-            "EAR": EAR, "MAR": MAR, "head_pose": head_pose, "gaze": gaze
-        }
-        return results
+        head_pose = 12 # placeholder value
+        gaze = 12 # placeholder value
+
+        results = {PERCLOS, YF, head_pose, gaze}
+        currentState = self.estimateSoA(PERCLOS, YF, gaze)
+        return results, currentState
+    
+    def estimateSoA(self, PERCLOS, YF, GD):
+        # determine state of attention *** CHANGE THRESHOLDS ***
+
+        if PERCLOS >= 0.35 or YF >= 2:
+            self.currentState = state.DROWSY
+        # elif GD indicates gaze away for > 2 seconds: # placeholder condition
+        #     state = "DISTRACTED"
+        else:
+            self.currentState = state.ATTENTIVE
+
+        self.SoA_history.append((time.time(), self.currentState)) # should it be every second ?
+        return self.currentState
+    
+    def processSoA(self, landmarks):
+        current_time = time.time()
+        # update current and prev states
+        _, currentSoA = self.process_frame(landmarks)
+
+        # if first run, initialize timer
+        if self.state_start_time is None:
+            self.state_start_time = current_time
+
+        # DEBUG
+        print("current state: {}".format(currentSoA))
+        print("prev state: {}".format(self.prevState))
+
+        # if state changed, reset timer
+        if currentSoA != self.prevState:
+            self.state_start_time = current_time
+            self.prevState = currentSoA
+
+        duration = current_time - self.state_start_time
+
+        # Debounce rules
+        if currentSoA == state.DROWSY and duration > self.drowsy_alert_time:
+            print("\nDROWSY ALERT")
+        elif currentSoA == state.DISTRACTED and duration > self.distracted_alert_time:
+            print("\nDISTRACTED ALERT")
+        return None
+
 

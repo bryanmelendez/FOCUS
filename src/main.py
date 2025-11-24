@@ -59,9 +59,19 @@ def main():
                 left_ear, right_ear, ear_avg = landmark_processor.compute_EAR(face_landmarks)
                 print(f"EAR: L = {left_ear:.3f}, R = {right_ear:.3f}, Avg = {ear_avg:.3f}")
 
+                # PERCLOS FUNCTION
+                perclos = landmark_processor.compute_PERCLOS(face_landmarks)
+                print(f"PERCLOS: {perclos:.1f}")
+
                 # MAR FUNCTION
                 mar = landmark_processor.compute_MAR(face_landmarks)
                 print(f"MAR: {mar:.3f}")
+
+                # YF FUNCTION
+                yawn_freq = landmark_processor.compute_yawn_freq(face_landmarks)
+                print(f"Yawn Frequency: {yawn_freq} yawns/min")
+
+                landmark_processor.processSoA(face_landmarks)
 
                 # ===================================================
 
