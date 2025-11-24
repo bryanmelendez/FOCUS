@@ -11,14 +11,8 @@ def rotation_matrix_to_angles(rotation_matrix):
     Calculate Euler angles (in degrees) from a 3x3 rotation matrix.
     These correspond to rotations around x (pitch), y (yaw), z (roll) axes.
     """
-     # pitch (x-axis rotation)
     x = math.atan2(rotation_matrix[2, 1], rotation_matrix[2, 2])
-   
-    # yaw (y-axis rotation)
-    y = math.atan2(-rotation_matrix[2, 0],
-                   math.sqrt(rotation_matrix[0, 0] ** 2 + rotation_matrix[1, 0] ** 2))
-    
-    # roll (z-axis rotation)
+    y = math.atan2(-rotation_matrix[2, 0], math.sqrt(rotation_matrix[0, 0] ** 2 + rotation_matrix[1, 0] ** 2))
     z = math.atan2(rotation_matrix[1, 0], rotation_matrix[0, 0])
 
     # Convert radians → degrees
@@ -47,14 +41,13 @@ class LandmarkProcessor:
 
         #approximate 3D coordinates of the human head
         face_coordination_real_world = np.array([
-         (0.0, 0.0, 0.0),       # Nose tip
-        (0, -63.6, -12.5),     # Chin
-        (-43.3, 32.7, -26),    # Left eye left corner
-        (43.3, 32.7, -26),     # Right eye right corner
-        (-28.9, -28.9, -24.1), # Left Mouth corner
-        (28.9, -28.9, -24.1)   # Right mouth corner
-    ])
-
+        [285, 528, 200], # Nose tip
+        [285, 371, 152], # Forehead
+        [197, 574, 128], # Mouth left corner
+        [173, 425, 108], # Left eye left corner
+        [360, 574, 128], # Mouth right corner
+        [391, 425, 108] # Right eye right corner
+         ], dtype=np.float64)
        #landmark_indices = [1,9,57,130,287,359]
        # face_coordination_image = np.array(
          #  [[landmarks[i].x * w, landmarks[i].y*h] for i in landmark_indices], dtype=np.float64
@@ -62,12 +55,12 @@ class LandmarkProcessor:
         
     
         face_coordination_image = np.array([
-        relative(landmarks[4], frame_shape),    # Nose tip
-        relative(landmarks[152], frame_shape),  # Chin
-        relative(landmarks[264], frame_shape),  # Left eye left corner
-        relative(landmarks[33], frame_shape),   # Right eye right corner
-        relative(landmarks[287], frame_shape),  # Left Mouth corner
-        relative(landmarks[57], frame_shape)    # Right mouth corner
+        relative(landmarks[1], frame_shape),  # Nose tip
+        relative(landmarks[9], frame_shape),  # Forehead
+        relative(landmarks[57], frame_shape), # Mouth left corner
+        relative(landmarks[130], frame_shape),   # Left eye left corner
+        relative(landmarks[287], frame_shape),  # Mouth right corner
+        relative(landmarks[359], frame_shape)    # Right eye right corner
     ], dtype="double")
 
         #camera matrix
