@@ -2,6 +2,30 @@ import cv2
 import math
 import numpy as np
 
+# Gaze Landmarks
+LEFT_IRIS        = [468, 469, 470, 471, 472]
+RIGHT_IRIS       = [473, 474, 475, 476, 477]
+
+LEFT_EYE_CORNERS  = [33, 133]
+RIGHT_EYE_CORNERS = [362, 263]
+
+LEFT_EYE_LIDS     = [159, 145]
+RIGHT_EYE_LIDS    = [386, 374]
+
+LEFT_EYE_OUTLINE  = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246]
+RIGHT_EYE_OUTLINE = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398]
+
+# Angular Thresholds
+CENTER_ANGLE   = 30    # ±30° → center
+LEFT_ANGLE_MIN = 135   # beyond ±135° → left
+LEFT_ANGLE_MAX = 180
+RIGHT_ANGLE_MIN = -180 # or +180 
+RIGHT_ANGLE_MAX = -135
+UP_ANGLE_MIN    = -135
+UP_ANGLE_MAX    = -45
+DOWN_ANGLE_MIN  = 45
+DOWN_ANGLE_MAX  = 135
+
 def relative(landmark, frame_shape):
     h, w = frame_shape[:2]
     return (int(landmark.x * w), int(landmark.y * h))
@@ -97,18 +121,65 @@ class LandmarkProcessor:
             "roll": angles[2]
         }
 
-    def compute_gaze(self, landmarks):
-        # todo
-        pass
+    def compute_eye_angle(self, landmarks, corner_idxs, lid_idxs, iris_idxs, frame_width, frame_height):
+        # Compute Eye Corners (x,y)
+        corners = []
+        for i in corner_idxs:
+            x = int(landmarks[i].x * frame_width)
+            y = int(landmarks[i].y * frame_height)
+            corners.append((x, y))
+        
+        # Compute Eyelid Verticle Center
+        y_top = int(landmarks[lid_idxs[0]].y * frame_height)
+        y_bottom = int(landmarks[lid_idxs[1]].y * frame_height)
+
+        # Compute Iris Points
+        iris_pts = []
+        for i in iris_idxs:
+            x = int(landmarks[i].x * frame_width)
+            y = int(landmarks[i].y * frame_height)
+            iris_pts.append((x, y))
+        
+        if not iris_pts:
+            return None
+
+        # Find Iris Center
+        (cx, cy), _ = cv2.minEnclosingCircle(np.array(iris_pts, dtype=np.int32))
+        cx, cy = int(cx), int(cy)
+
+        # Compute the Eye Center
+        x_center = (corners[0][0] + corners[1][0]) // 2
+        y_center = int((y_top+y_bottom) / 2)
+
+        # Compute the Angle Between Iris Center and Eye Center
+        dx = cx - x_center
+        dy = cy - y_center
+        theta = math.degrees(math.atan2(dy, dx))
+
+        return theta
+
+
+    def compute_gaze(self, landmarks, frame_shape):
+        h, w, _ = frame_shape
+
+        left_eye_angle = self.compute_eye_angle(
+            landmarks, LEFT_EYE_CORNERS, LEFT_EYE_LIDS, LEFT_IRIS, w, h 
+        )
+        right_eye_angle = self.compute_eye_angle(
+            landmarks, RIGHT_EYE_CORNERS, RIGHT_EYE_LIDS, RIGHT_IRIS, w, h 
+        )
+
+        return (left_eye_angle, right_eye_angle)
+
+
 
     def process_frame(self, landmarks, frame_shape):
         EAR = self.compute_EAR(landmarks)
         MAR = self.compute_MAR(landmarks)
         head_pose = self.compute_head_pose(landmarks, frame_shape)
-        gaze = self.compute_gaze(landmarks)
+        gaze = self.compute_gaze(landmarks, frame_shape)
 
         results = {
             "EAR": EAR, "MAR": MAR, "head_pose": head_pose, "gaze": gaze
         }
         return results
-

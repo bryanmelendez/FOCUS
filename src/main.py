@@ -39,12 +39,13 @@ def main():
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
-            if current_time - last_plot_time >= 1.0:
+            if current_time - last_plot_time >= 1.0: # ~30 FPS
                 # Create MediaPipe Image from cv2 frame
                 mp_image = face_detector.create_mediapipe_image(frame)
                 results = face_detector.get_landmarks(mp_image)
                 if results is None or len(results.face_landmarks) == 0:
                     continue
+                
                 face_landmarks = results.face_landmarks[0]
 
                 # print('face landmarker result: {}'.format(results)) # uncomment this if you want to see the full landmarks data
@@ -57,7 +58,8 @@ def main():
                 if head_pose:
                     print(f"Pitch: {head_pose['pitch']:.2f}, "
                           f"Yaw: {head_pose['yaw']:.2f}, "
-                          f"Roll: {head_pose['roll']:.2f}")
+                          f"Roll: {head_pose['roll']:.2f}, "
+                          f"Left Eye Angle: {head_pose['left_eye_angle']:.2f}, Right Eye Angle: {head_pose['right_eye_angle']:.2f}")
                     
                 # NOTE: Example - remove this later
                 #nose_tip = face_landmarks[4]
