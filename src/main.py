@@ -18,14 +18,13 @@ def main():
     save_frames = True 
 
     landmark_processor = LandmarkProcessor()
-    # face_detector.run_detection()
-    # face_detector.get_landmarks_looped()
+    logger = Logger()
 
     cap = cv2.VideoCapture(0)  # 0 is usually the built-in webcam
         
     # Check if camera opened successfully
     if not cap.isOpened():
-        print("Error: Could not open camera")
+        logger.error("Error: Could not open camera")
         return
 
     last_plot_time = time()
@@ -40,16 +39,13 @@ def main():
             ret, frame = cap.read()
             
             if not ret:
-                print("Error: Can't receive frame")
+                logger.error("Error: Can't receive frame")
                 break
 
             # Display the frame
             cv2.imshow('FOCUS Camera Feed', frame)
-            # Break if 'q' is pressed
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
 
-            if current_time - last_plot_time >= 1.0: # ~30 FPS
+            if current_time - last_plot_time >= 0.03333333: # ~30 FPS
                 # Create MediaPipe Image from cv2 frame
                 mp_image = face_detector.create_mediapipe_image(frame)
                 results = face_detector.get_landmarks(mp_image)
@@ -65,12 +61,18 @@ def main():
                 # NOTE - this is where you would call the algorithms
                 pose_results = landmark_processor.process_frame(face_landmarks, frame.shape)
                 head_pose = pose_results["head_pose"]
+                gaze = pose_results["gaze"]
 
                 if head_pose:
-                    print(f"Pitch: {head_pose['pitch']:.2f}, "
+                    logger.info(f"Pitch: {head_pose['pitch']:.2f}, "
                           f"Yaw: {head_pose['yaw']:.2f}, "
-                          f"Roll: {head_pose['roll']:.2f}, "
-                          f"Left Eye Angle: {head_pose['left_eye_angle']:.2f}, Right Eye Angle: {head_pose['right_eye_angle']:.2f}")
+                          f"Roll: {head_pose['roll']:.2f}")
+                        
+                if gaze:
+                    logger.info(f"Left Eye Angle: {gaze[0]:.2f}, "
+                          f"Right Eye Angle: {gaze[1]:.2f}")
+                    logger.info(f"Left Eye Gaze Direction: {gaze[2]}, "
+                          f"Right Eye Gaze Direction: {gaze[3]}")
                     
                 # NOTE: Example - remove this later
 

@@ -112,8 +112,8 @@ class LandmarkProcessor:
         rotation_matrix, _ = cv2.Rodrigues(rotation_vec)
         angles = rotation_matrix_to_angles(rotation_matrix)
 
-        print("Rotation matrix: ")
-        print(rotation_matrix)
+        # print("Rotation matrix: ")
+        # print(rotation_matrix)
 
         return{
             "pitch": angles[0],
@@ -158,6 +158,25 @@ class LandmarkProcessor:
 
         return theta
 
+    def classify_gaze_direction(self, theta):
+        if -CENTER_ANGLE <= theta <= +CENTER_ANGLE:
+            d = 'Center'
+        elif (theta >= LEFT_ANGLE_MIN and theta <= LEFT_ANGLE_MAX) or \
+             (theta <= RIGHT_ANGLE_MAX and theta <= RIGHT_ANGLE_MIN):
+            d = 'Left'
+        elif UP_ANGLE_MIN <= theta <= UP_ANGLE_MAX:
+            d = 'Up'
+        elif DOWN_ANGLE_MIN <= theta <= DOWN_ANGLE_MAX:
+            d = 'Down'
+        else:
+            # angles between +30°→+150° treated as “Right”
+            if theta > CENTER_ANGLE and theta < DOWN_ANGLE_MIN:
+                d = 'Right'
+            else:
+                d = 'Left'
+        
+        return d
+        
 
     def compute_gaze(self, landmarks, frame_shape):
         h, w, _ = frame_shape
@@ -169,8 +188,12 @@ class LandmarkProcessor:
             landmarks, RIGHT_EYE_CORNERS, RIGHT_EYE_LIDS, RIGHT_IRIS, w, h 
         )
 
-        return (left_eye_angle, right_eye_angle)
+        gaze_left = self.classify_gaze_direction(left_eye_angle)
+        gaze_right = self.classify_gaze_direction(right_eye_angle)
 
+        print(f"Gaze Left Eye: {gaze_left}, Gaze Right Eye: {gaze_right}")
+        
+        return (left_eye_angle, right_eye_angle, gaze_left, gaze_right)
 
 
     def process_frame(self, landmarks, frame_shape):
