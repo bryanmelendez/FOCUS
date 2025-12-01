@@ -3,6 +3,7 @@ import numpy as np
 import time
 from collections import deque
 from enum import Enum
+import matplotlib.pyplot as plt
 
 # Define an enumeration for different states of attention
 class state(Enum):
@@ -190,4 +191,28 @@ class LandmarkProcessor:
             print("\nDISTRACTED ALERT")
         return None
 
+    def graph_SoA_history(self):
+        if not self.SoA_history:
+            print("No state history to graph.")
+            return
+    
+        # Convert enum to numeric for graphing
+        state_to_value = {
+            state.DROWSY: 0,
+            state.DISTRACTED: 1,
+            state.ATTENTIVE: 2
+        }
 
+        times = [t - self.SoA_history[0][0] for (t, s) in self.SoA_history]
+        values = [state_to_value[s] for (_, s) in self.SoA_history]
+
+        plt.figure(figsize=(10, 4))
+        plt.plot(times, values, linewidth=2)
+
+        plt.yticks([0, 1, 2], ["DROWSY", "DISTRACTED", "ATTENTIVE"])
+        plt.xlabel("Time (s)")
+        plt.ylabel("State of Attention")
+        plt.title("Attention State Timeline")
+        plt.grid(True)
+
+        plt.show(block=True)

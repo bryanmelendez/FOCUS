@@ -73,6 +73,7 @@ def main():
 
                 landmark_processor.processSoA(face_landmarks)
 
+
                 # ===================================================
 
                 plt.clf()  # Clear the current figure
@@ -90,9 +91,13 @@ def main():
     except KeyboardInterrupt:
         print("\nStopping camera feed...")
     finally:
+        
         cap.release()
         cv2.destroyAllWindows()
         plt.close('all')
+        # end graphing
+        plt.ioff()   # turn off interactive mode
+        landmark_processor.graph_SoA_history()
         print("Camera released")
 
 if __name__ == "__main__":
