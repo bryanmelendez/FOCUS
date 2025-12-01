@@ -15,6 +15,7 @@ RIGHT_EYE_LIDS    = [386, 374]
 LEFT_EYE_OUTLINE  = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246]
 RIGHT_EYE_OUTLINE = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398]
 
+# TODO - change these to the new angle classification system
 # Angular Thresholds
 CENTER_ANGLE   = 30    # ±30° → center
 LEFT_ANGLE_MIN = 135   # beyond ±135° → left
@@ -121,7 +122,7 @@ class LandmarkProcessor:
             "roll": angles[2]
         }
 
-    def compute_eye_angle(self, landmarks, corner_idxs, lid_idxs, iris_idxs, frame_width, frame_height):
+    def compute_eye_angle(self, landmarks, corner_idxs, lid_idxs, iris_idxs, frame_width, frame_height) -> tuple:
         # Compute Eye Corners (x,y)
         corners = []
         for i in corner_idxs:
@@ -132,6 +133,10 @@ class LandmarkProcessor:
         # Compute Eyelid Verticle Center
         y_top = int(landmarks[lid_idxs[0]].y * frame_height)
         y_bottom = int(landmarks[lid_idxs[1]].y * frame_height)
+        
+        # Compute the Eye Center
+        x_center = (corners[0][0] + corners[1][0]) // 2
+        y_center = int((y_top+y_bottom) / 2)
 
         # Compute Iris Points
         iris_pts = []
@@ -141,59 +146,55 @@ class LandmarkProcessor:
             iris_pts.append((x, y))
         
         if not iris_pts:
-            return None
+            return (None, None, None)
 
         # Find Iris Center
         (cx, cy), _ = cv2.minEnclosingCircle(np.array(iris_pts, dtype=np.int32))
         cx, cy = int(cx), int(cy)
 
-        # Compute the Eye Center
-        x_center = (corners[0][0] + corners[1][0]) // 2
-        y_center = int((y_top+y_bottom) / 2)
-
         # Compute the Angle Between Iris Center and Eye Center
         dx = cx - x_center
-        dy = cy - y_center
+        dy = cy - y_center # NOTE - this is where the problem is - if you look up y should be positive, if you look down y should be negative (both are negative)
+        print("CHECK")
+        print(f"dx: {dx}, dy: {dy}")
+        print("CHECK DONE")
+
         theta = math.degrees(math.atan2(dy, dx))
 
-        return theta
+        return (theta, dx, dy)
 
-    def classify_gaze_direction(self, theta):
-        if -CENTER_ANGLE <= theta <= +CENTER_ANGLE:
-            d = 'Center'
-        elif (theta >= LEFT_ANGLE_MIN and theta <= LEFT_ANGLE_MAX) or \
-             (theta <= RIGHT_ANGLE_MAX and theta <= RIGHT_ANGLE_MIN):
-            d = 'Left'
-        elif UP_ANGLE_MIN <= theta <= UP_ANGLE_MAX:
-            d = 'Up'
-        elif DOWN_ANGLE_MIN <= theta <= DOWN_ANGLE_MAX:
-            d = 'Down'
-        else:
-            # angles between +30°→+150° treated as “Right”
-            if theta > CENTER_ANGLE and theta < DOWN_ANGLE_MIN:
-                d = 'Right'
-            else:
-                d = 'Left'
-        
-        return d
-        
+    def classify_gaze_direction(self, eye):
+        theta = eye[0]
+        dx = eye[1]
+
+        if -7 < dx < 7: # TODO - find the actual threshold
+            return "Center"
+
+        if -45 <= theta < 45:
+            return "Right"
+        if 45 <= theta < 135:
+            return "Down"
+        if theta >= 135 or theta < -135:
+            return "Left"
+        if -135 <= theta < -45:
+            return "Up"
 
     def compute_gaze(self, landmarks, frame_shape):
         h, w, _ = frame_shape
 
-        left_eye_angle = self.compute_eye_angle(
+        left_eye = self.compute_eye_angle(
             landmarks, LEFT_EYE_CORNERS, LEFT_EYE_LIDS, LEFT_IRIS, w, h 
         )
-        right_eye_angle = self.compute_eye_angle(
+        right_eye = self.compute_eye_angle(
             landmarks, RIGHT_EYE_CORNERS, RIGHT_EYE_LIDS, RIGHT_IRIS, w, h 
         )
 
-        gaze_left = self.classify_gaze_direction(left_eye_angle)
-        gaze_right = self.classify_gaze_direction(right_eye_angle)
+        gaze_left = self.classify_gaze_direction(left_eye)
+        gaze_right = self.classify_gaze_direction(right_eye)
 
         print(f"Gaze Left Eye: {gaze_left}, Gaze Right Eye: {gaze_right}")
         
-        return (left_eye_angle, right_eye_angle, gaze_left, gaze_right)
+        return (left_eye[0], right_eye[0], gaze_left, gaze_right)
 
 
     def process_frame(self, landmarks, frame_shape):
