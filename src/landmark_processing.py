@@ -155,9 +155,6 @@ class LandmarkProcessor:
         # Compute the Angle Between Iris Center and Eye Center
         dx = cx - x_center
         dy = cy - y_center # NOTE - this is where the problem is - if you look up y should be positive, if you look down y should be negative (both are negative)
-        print("CHECK")
-        print(f"dx: {dx}, dy: {dy}")
-        print("CHECK DONE")
 
         theta = math.degrees(math.atan2(dy, dx))
 
@@ -192,8 +189,6 @@ class LandmarkProcessor:
         gaze_left = self.classify_gaze_direction(left_eye)
         gaze_right = self.classify_gaze_direction(right_eye)
 
-        print(f"Gaze Left Eye: {gaze_left}, Gaze Right Eye: {gaze_right}")
-        
         return (left_eye[0], right_eye[0], gaze_left, gaze_right)
 
 
