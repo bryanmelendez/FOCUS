@@ -13,7 +13,7 @@ class state(Enum):
 
 class LandmarkProcessor:
     def __init__(self):
-        self.funct_time = 60 # second *** REMEMBER TO CHANGE !!! ***
+        self.funct_time = 15 # second *** REMEMBER TO CHANGE !!! ***
         # EAR values
         self.closed_start_time = None
         self.isClosed = False
