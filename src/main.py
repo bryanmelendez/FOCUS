@@ -105,9 +105,9 @@ def main():
                 annotated_image = face_detector.draw_landmarks_on_image(mp_image.numpy_view(), results)
 
                 # save the image to logs
-                if save_frames:
-                    frame_filename = f"{frames_dir}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.jpg"
-                    cv2.imwrite(frame_filename, frame)
+                # if save_frames:
+                #     frame_filename = f"{frames_dir}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.jpg"
+                #     cv2.imwrite(frame_filename, frame)
 
                 plt.imshow(annotated_image)
                 plt.axis('off')
