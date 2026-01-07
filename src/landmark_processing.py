@@ -285,14 +285,14 @@ class LandmarkProcessor:
         if -7 < dx < 7 and -3 < dy < 3: # TODO - find the actual threshold
             return "Center"
 
-        if -45 <= theta < 45:
+        if 135 <= theta <= 180 or -180 <= theta <= -135:
             return "Right"
+        if -135 < theta <= -45:
+            return "Up"
+        if 0 <= theta < 45 or 0 > theta > -45:
+            return "Left"
         if 45 <= theta < 135:
             return "Down"
-        if theta >= 135 or theta < -135:
-            return "Left"
-        if -135 <= theta < -45:
-            return "Up"
 
     def compute_gaze(self, landmarks, frame_shape):
         h, w, _ = frame_shape
