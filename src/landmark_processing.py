@@ -5,6 +5,7 @@ from collections import deque
 from enum import Enum
 import matplotlib.pyplot as plt
 import math
+from utils.logger import Logger
 
 # Define an enumeration for different states of attention
 class state(Enum):
@@ -59,6 +60,7 @@ def rotation_matrix_to_angles(rotation_matrix):
 
 class LandmarkProcessor:
     def __init__(self):
+        self.logger = Logger()
         self.funct_time = 60 # second *** REMEMBER TO CHANGE !!! ***
         # EAR values
         self.closed_start_time = None
@@ -279,7 +281,7 @@ class LandmarkProcessor:
 
         # Compute the Angle Between Iris Center and Eye Center
         dx = cx - x_center
-        dy = cy - y_center # NOTE - this is where the problem is - if you look up y should be positive, if you look down y should be negative (both are negative)
+        dy = cy - y_center
 
         theta = math.degrees(math.atan2(dy, dx))
 
@@ -360,7 +362,6 @@ class LandmarkProcessor:
                 self.gaze_direction_start_time = current_time
             elif current_time - self.gaze_direction_start_time > self.distracted_time:
                 self.currentState = state.DISTRACTED
-                print("gaze distracted")
         else:
             self.gaze_direction_start_time = None
 
@@ -382,8 +383,8 @@ class LandmarkProcessor:
             self.state_start_time = current_time
 
         # DEBUG
-        print("current state: {}".format(currentSoA))
-        print("prev state: {}".format(self.prevState))
+        # print("current state: {}".format(currentSoA))
+        # print("prev state: {}".format(self.prevState))
 
         # if state changed, reset timer
         if currentSoA != self.prevState:
@@ -393,11 +394,11 @@ class LandmarkProcessor:
         duration = current_time - self.state_start_time
 
         if currentSoA == state.DROWSY and duration > self.drowsy_alert_time:
-            print("\nDROWSY ALERT")
+            self.logger.info("DROWSY ALERT")
         elif currentSoA == state.DISTRACTED and duration > self.distracted_alert_time:
-            print("\nDISTRACTED ALERT")
+            self.logger.info("DISTRACTED ALERT")
 
-        return results
+        return results, currentSoA
 
     def graph_SoA_history(self):
         if not self.SoA_history:
