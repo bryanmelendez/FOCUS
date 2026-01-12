@@ -77,7 +77,7 @@ class LandmarkProcessor:
         # HP values
         self.yaw_threshold = 30 # degrees
         self.pitch_threshold = 20 # degrees
-        self.roll_threshold = 30 # degrees
+        self.roll_threshold = 35 # degrees
         self.distracted_time = 3.0 # seconds
         self.head_pose_start_time = None
         # Gaze values
