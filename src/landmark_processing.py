@@ -77,8 +77,11 @@ class LandmarkProcessor:
         # HP values
         self.yaw_threshold = 30 # degrees
         self.pitch_threshold = 20 # degrees
+        self.roll_threshold = 30 # degrees
         self.distracted_time = 3.0 # seconds
         self.head_pose_start_time = None
+        # Gaze values
+        self.gaze_direction_start_time = None
         # SoA
         self.currentState = self.prevState = state.ATTENTIVE
         self.state_start_time = None
@@ -338,15 +341,28 @@ class LandmarkProcessor:
         if PERCLOS >= 0.35 or YF >= 2:
             self.currentState = state.DROWSY
         # DISTRACTED condition
+        # head pose
         yaw = abs(head_pose["yaw"])
         pitch = abs(head_pose["pitch"])
-        if yaw > self.yaw_threshold or pitch > self.pitch_threshold:
+        roll = abs(head_pose["roll"])
+        if yaw > self.yaw_threshold or pitch > self.pitch_threshold or roll > self.roll_threshold:
             if self.head_pose_start_time is None:
                 self.head_pose_start_time = current_time
             elif current_time - self.head_pose_start_time > self.distracted_time:
                 self.currentState = state.DISTRACTED
         else:
             self.head_pose_start_time = None
+        # gaze direction
+        gaze_left = GD[2]
+        gaze_right = GD[3]
+        if gaze_left != "Center" and gaze_right != "Center":
+            if self.gaze_direction_start_time is None:
+                self.gaze_direction_start_time = current_time
+            elif current_time - self.gaze_direction_start_time > self.distracted_time:
+                self.currentState = state.DISTRACTED
+                print("gaze distracted")
+        else:
+            self.gaze_direction_start_time = None
 
         # ATTENTIVE condition
         if self.currentState != state.DROWSY and self.currentState != state.DISTRACTED:

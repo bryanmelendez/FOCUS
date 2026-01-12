@@ -42,8 +42,9 @@ def main():
                 logger.error("Error: Can't receive frame")
                 break
 
+            # UNCOMMENT TO SHOW TO CAMERA FEED
             # Display the frame
-            cv2.imshow('FOCUS Camera Feed', frame)
+            # cv2.imshow('FOCUS Camera Feed', frame)
 
             if current_time - last_plot_time >= 0.03333333: # ~30 FPS
                 # Create MediaPipe Image from cv2 frame
@@ -109,10 +110,11 @@ def main():
                 #     frame_filename = f"{frames_dir}/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}.jpg"
                 #     cv2.imwrite(frame_filename, frame)
 
-                plt.imshow(annotated_image)
-                plt.axis('off')
-                plt.draw()
-                plt.pause(0.001)
+                # UNCOMMENT TO SHOW THE IMAGE
+                # plt.imshow(annotated_image)
+                # plt.axis('off')
+                # plt.draw()
+                # plt.pause(0.001)
 
                 last_plot_time = current_time
             
