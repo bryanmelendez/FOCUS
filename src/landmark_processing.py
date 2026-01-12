@@ -348,9 +348,9 @@ class LandmarkProcessor:
         else:
             self.head_pose_start_time = None
 
-        # fix VVVV
         # ATTENTIVE condition
-        self.currentState = state.ATTENTIVE
+        if self.currentState != state.DROWSY and self.currentState != state.DISTRACTED:
+            self.currentState = state.ATTENTIVE
         self.SoA_history.append((time.time(), self.currentState)) # should it be every second ?
         return self.currentState
     
