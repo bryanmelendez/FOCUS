@@ -13,7 +13,7 @@ from utils.logger import Logger
 
 model_path = 'models/face_landmarker.task'
 
-IMAGE_PATH = 'images/matthew.jpg'
+IMAGE_PATH = 'images/eyesclosed.jpg'
 
 def draw_landmarks_on_image(rgb_image, detection_result):
   face_landmarks_list = detection_result.face_landmarks
