@@ -74,6 +74,11 @@ class LandmarkProcessor:
         self.yawn_minimum = 3 # minimum of 4 seconds for an open mouth to be consired a yawn
         self.isYawning = False
         self.yawn_start_time = None
+        # HP values
+        self.yaw_threshold = 30 # degrees
+        self.pitch_threshold = 20 # degrees
+        self.distracted_time = 3.0 # seconds
+        self.head_pose_start_time = None
         # SoA
         self.currentState = self.prevState = state.ATTENTIVE
         self.state_start_time = None
@@ -315,35 +320,41 @@ class LandmarkProcessor:
         MAR = self.compute_MAR(landmarks)
         PERCLOS = self.compute_PERCLOS(landmarks)
         YF = self.compute_yawn_freq(landmarks)
-        #head_pose = self.compute_head_pose(landmarks)
-        #gaze = self.compute_gaze(landmarks)
-
-        head_pose = 12 # placeholder value
-        gaze = 12 # placeholder value
-
-        results = {PERCLOS, YF, head_pose, gaze}
-        currentState = self.estimateSoA(PERCLOS, YF, gaze)
-
         head_pose = self.compute_head_pose(landmarks, frame_shape)
         gaze = self.compute_gaze(landmarks, frame_shape)
+        #head_pose = 12 # placeholder value
+        #gaze = 12 # placeholder value
 
         results = {
-            "EAR": EAR, "MAR": MAR, "head_pose": head_pose, "gaze": gaze
+            "EAR": EAR, "MAR": MAR, "PERCLOS": PERCLOS, "YF": YF, "head_pose": head_pose, "gaze": gaze
         }
+        currentState = self.estimateSoA(PERCLOS, YF, gaze, head_pose)
         return results, currentState
 
-    def estimateSoA(self, PERCLOS, YF, GD):
+    def estimateSoA(self, PERCLOS, YF, GD, head_pose):
         # determine state of attention *** CHANGE THRESHOLDS ***
-
+        current_time = time.time()
+        # DROWSY condition
         if PERCLOS >= 0.35 or YF >= 2:
             self.currentState = state.DROWSY
-        # elif GD indicates gaze away for > 2 seconds: # placeholder condition
-        #     state = "DISTRACTED"
+        # DISTRACTED condition
+        yaw = abs(head_pose["yaw"])
+        pitch = abs(head_pose["pitch"])
+        if yaw > self.yaw_threshold or pitch > self.pitch_threshold:
+            if self.head_pose_start_time is None:
+                self.head_pose_start_time = current_time
+            elif current_time - self.head_pose_start_time > self.distracted_time:
+                self.currentState = state.DISTRACTED
         else:
-            self.currentState = state.ATTENTIVE
+            self.head_pose_start_time = None
 
+        # fix VVVV
+        # ATTENTIVE condition
+        self.currentState = state.ATTENTIVE
         self.SoA_history.append((time.time(), self.currentState)) # should it be every second ?
         return self.currentState
+    
+        
     
     def processSoA(self, landmarks, frame_shape):
         current_time = time.time()
@@ -365,7 +376,6 @@ class LandmarkProcessor:
 
         duration = current_time - self.state_start_time
 
-        # Debounce rules
         if currentSoA == state.DROWSY and duration > self.drowsy_alert_time:
             print("\nDROWSY ALERT")
         elif currentSoA == state.DISTRACTED and duration > self.distracted_alert_time:
