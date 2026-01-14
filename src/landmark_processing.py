@@ -338,6 +338,9 @@ class LandmarkProcessor:
 
     def estimateSoA(self, PERCLOS, YF, GD, head_pose):
         # determine state of attention *** CHANGE THRESHOLDS ***
+
+        soa = None
+
         current_time = time.time()
         # DROWSY condition
         if PERCLOS >= 0.35 or YF >= 2:
@@ -351,8 +354,9 @@ class LandmarkProcessor:
             if self.head_pose_start_time is None:
                 self.head_pose_start_time = current_time
             elif current_time - self.head_pose_start_time > self.distracted_time:
-                self.currentState = state.DISTRACTED
+                soa = state.DISTRACTED
         else:
+            soa = state.ATTENTIVE
             self.head_pose_start_time = None
         # gaze direction
         gaze_left = GD[2]
@@ -361,13 +365,17 @@ class LandmarkProcessor:
             if self.gaze_direction_start_time is None:
                 self.gaze_direction_start_time = current_time
             elif current_time - self.gaze_direction_start_time > self.distracted_time:
-                self.currentState = state.DISTRACTED
+                soa = state.DISTRACTED
         else:
+            soa = state.ATTENTIVE
             self.gaze_direction_start_time = None
 
-        # ATTENTIVE condition
-        if self.currentState != state.DROWSY and self.currentState != state.DISTRACTED:
-            self.currentState = state.ATTENTIVE
+        if soa is not None: 
+            self.currentState = soa 
+        
+        if self.currentState == None:
+            self.logger.error("there is no current state!")
+
         self.SoA_history.append((time.time(), self.currentState)) # should it be every second ?
         return self.currentState
     
