@@ -7,7 +7,7 @@ from PySide6 import QtCore, QtWidgets, QtGui
 
 from src.controller.controller import PomodoroController
 
-class PomodoroTimerWidget(QtWidgets.QWidget):
+class PomodoroTimerView(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.controller = PomodoroController()
@@ -51,13 +51,3 @@ class PomodoroTimerWidget(QtWidgets.QWidget):
         self.stop_button.setEnabled(is_running)
 
 
-class GUI:
-    def __init__(self) -> None:
-        pass
-
-    def start_gui(self):
-        app = QtWidgets.QApplication([])
-        widget = PomodoroTimerWidget()
-        widget.resize(400, 300)
-        widget.show()
-        sys.exit(app.exec())

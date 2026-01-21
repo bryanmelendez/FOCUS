@@ -1,4 +1,12 @@
-class AppController(QObject):
+from face_controller import FaceController
+from timer_controller import TimerController
+from model.face_model import FaceModel 
+from model.pomodoro_timer_model import PomodoroModel
+from model.regular_mode_timer_model import RegularTimerModel
+
+from PySide6 import QtCore, QtWidgets, QtGui
+
+class AppController(QtCore.QObject):
     def __init__(self):
         super().__init__()
 
