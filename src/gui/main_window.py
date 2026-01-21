@@ -1,16 +1,20 @@
-from pomodoro_view import PomodoroTimerView 
-from regular_mode_view import RegularTimerView 
 
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtWidgets import QApplication, QMainWindow, QStackedWidget
+from gui.pomodoro_view import PomodoroView
 
-class MainWindow(QtWidgets.QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self, app_controller):
         super().__init__()
         self.controller = app_controller
 
-        # self.regular_view = RegularTimerView()
-        self.pomodoro_view = PomodoroTimerView()
+        self.setWindowTitle("custom main window")
 
-        self.stacked = QtWidgets.QStackedWidget()
-        # self.stacked.addWidget(self.regular_view)
+        self.pomodoro_view = PomodoroView()
+
+        self.stacked = QStackedWidget()
         self.stacked.addWidget(self.pomodoro_view)
+
+        self.setCentralWidget(self.stacked)
+
+
+
