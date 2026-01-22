@@ -1,14 +1,10 @@
-import sys, os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+from PySide6.QtWidgets import QApplication
 from gui.main_window import MainWindow
-from controller.app_controller import AppController
+import sys
 
-if __name__ == "__main__":
-    print("Starting app")
+app = QApplication(sys.argv)
 
-    app_controller = AppController()
+main_window = MainWindow(app_controller=None)
+main_window.show()
 
-    app = MainWindow(app_controller)
-
-    app.start_gui()
+app.exec()
