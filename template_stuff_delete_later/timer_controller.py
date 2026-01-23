@@ -1,3 +1,4 @@
+
 class TimerController(QObject):
     time_updated = Signal(int)
     running_changed = Signal(bool)
