@@ -6,3 +6,6 @@ class RegularModeController:
 
     def start_regular_mode(self):
         print(self.model.test)
+
+    def stop_regular_mode(self):
+        print("Stopping the session")

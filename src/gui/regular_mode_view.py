@@ -25,3 +25,9 @@ class RegularTimerView(QWidget):
         self.start_button.setFixedSize(200, 60)
         self.start_button.clicked.connect(self.controller.start_regular_mode) # connect it to the controller
         layout.addWidget(self.start_button, alignment=Qt.AlignCenter)
+
+        # Stop button
+        self.start_button = QPushButton("Stop")
+        self.start_button.setFixedSize(200, 60)
+        self.start_button.clicked.connect(self.controller.stop_regular_mode) # connect it to the controller
+        layout.addWidget(self.start_button, alignment=Qt.AlignCenter)
