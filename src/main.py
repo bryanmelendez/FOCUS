@@ -116,6 +116,7 @@ def main():
             
     except KeyboardInterrupt:
         print("\nStopping camera feed...")
+        landmark_processor.print_stats()
     finally:
         cap.release()
         cv2.destroyAllWindows()

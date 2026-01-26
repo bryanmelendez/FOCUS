@@ -9,9 +9,8 @@ from utils.logger import Logger
 
 # Define an enumeration for different states of attention
 class state(Enum):
-    DROWSY = 1
-    DISTRACTED = 2
-    ATTENTIVE = 3
+    INATTENTIVE = 1
+    ATTENTIVE = 2
 
 # Gaze Landmarks
 LEFT_IRIS        = [468, 469, 470, 471, 472]
@@ -70,14 +69,14 @@ class LandmarkProcessor:
         self.avg_EAR_history = deque() # holds timestamp and avg EAR value
         self.closed_maximum = 0.25 # EAR is less than this -> eye closed
         # MAR/YF values
-        self.MAR_minimum = 0.2 # MAR higher than this -> mouth open
+        self.MAR_minimum = 0.7 # MAR higher than this -> mouth open
         self.MAR_history = deque() # holds timestamp and MAR value
         self.yawn_history = deque() # holds yawns 
         self.yawn_minimum = 3 # minimum of 4 seconds for an open mouth to be consired a yawn
         self.isYawning = False
         self.yawn_start_time = None
         # HP values
-        self.yaw_threshold = 30 # degrees
+        self.yaw_threshold = 25 # degrees
         self.pitch_threshold = 20 # degrees
         self.roll_threshold = 35 # degrees
         self.distracted_time = 3.0 # seconds
@@ -87,15 +86,16 @@ class LandmarkProcessor:
         # SoA
         self.currentState = self.prevState = state.ATTENTIVE
         self.state_start_time = None
-        self.drowsy_alert_time = 5 # seconds
-        self.distracted_alert_time = 5 # seconds
-        # if want to see trend at end or in email summary or something :p
+        self.inattentive_alert_time = 5 # seconds
+        self.attentive_reset_time = 5 # seconds
+        self.inattentive_flag = False
+        self.inattentive_count = 0
         self.SoA_history = []
     
     def compute_EAR(self, landmarks):
         # define landmarks
         right_eye = [33, 160, 158, 133, 153, 144]
-        left_eye = [33, 160, 158, 133, 153, 144]
+        left_eye = [362, 385, 387, 263, 373, 380]
 
         # calculate EAR
         def eye_aspect_ratio(eye_landmarks):
@@ -333,39 +333,46 @@ class LandmarkProcessor:
         results = {
             "EAR": EAR, "MAR": MAR, "PERCLOS": PERCLOS, "YF": YF, "head_pose": head_pose, "gaze": gaze
         }
-        currentState = self.estimateSoA(PERCLOS, YF, gaze, head_pose)
+        currentState = self.estimateSoA(EAR, PERCLOS, YF, gaze, head_pose)
         return results, currentState
 
-    def estimateSoA(self, PERCLOS, YF, GD, head_pose):
+    def estimateSoA(self, EAR, PERCLOS, YF, GD, head_pose):
         # determine state of attention *** CHANGE THRESHOLDS ***
 
         soa = None
 
         current_time = time.time()
-        # DROWSY condition
-        if PERCLOS >= 0.35 or YF >= 2:
-            self.currentState = state.DROWSY
-        # DISTRACTED condition
-        # head pose
+
         yaw = abs(head_pose["yaw"])
         pitch = abs(head_pose["pitch"])
         roll = abs(head_pose["roll"])
-        if yaw > self.yaw_threshold or pitch > self.pitch_threshold or roll > self.roll_threshold:
+        gaze_left = GD[2]
+        gaze_right = GD[3]
+
+        # INATTENTIVE condition
+        # EAR and YF
+        # if (1 == 1):
+        #     soa = state.INATTENTIVE
+        if EAR[2] < self.closed_maximum and PERCLOS > 0.4:
+            if self.closed_start_time is None:
+                self.closed_start_time = current_time
+            elif current_time - self.closed_start_time > self.closed_time_minumum:
+                soa = state.INATTENTIVE
+        elif YF > 2:
+            soa = state.INATTENTIVE
+        # head pose
+        elif yaw > self.yaw_threshold or pitch > self.pitch_threshold or roll > self.roll_threshold:
             if self.head_pose_start_time is None:
                 self.head_pose_start_time = current_time
             elif current_time - self.head_pose_start_time > self.distracted_time:
-                soa = state.DISTRACTED
-        else:
-            soa = state.ATTENTIVE
-            self.head_pose_start_time = None
+                soa = state.INATTENTIVE
         # gaze direction
-        gaze_left = GD[2]
-        gaze_right = GD[3]
-        if gaze_left != "Center" and gaze_right != "Center":
+        
+        elif gaze_left != "Center" and gaze_right != "Center":
             if self.gaze_direction_start_time is None:
                 self.gaze_direction_start_time = current_time
             elif current_time - self.gaze_direction_start_time > self.distracted_time:
-                soa = state.DISTRACTED
+                soa = state.INATTENTIVE
         else:
             soa = state.ATTENTIVE
             self.gaze_direction_start_time = None
@@ -383,12 +390,14 @@ class LandmarkProcessor:
     
     def processSoA(self, landmarks, frame_shape):
         current_time = time.time()
+
         # update current and prev states
         results, currentSoA = self.process_frame(landmarks, frame_shape)
 
         # if first run, initialize timer
         if self.state_start_time is None:
             self.state_start_time = current_time
+            self.SoA_history.append((current_time, self.currentState))
 
         # DEBUG
         # print("current state: {}".format(currentSoA))
@@ -401,35 +410,85 @@ class LandmarkProcessor:
 
         duration = current_time - self.state_start_time
 
-        if currentSoA == state.DROWSY and duration > self.drowsy_alert_time:
-            self.logger.info("DROWSY ALERT")
-        elif currentSoA == state.DISTRACTED and duration > self.distracted_alert_time:
-            self.logger.info("DISTRACTED ALERT")
+        if currentSoA == state.INATTENTIVE and duration > self.inattentive_alert_time:
+            if self.inattentive_flag == False:
+                self.inattentive_flag = True
+                self.inattentive_count += 1
+                self.logger.info("INATTENTIVE ALERT")
+        elif currentSoA == state.ATTENTIVE:
+            self.inattentive_flag = False
 
         return results, currentSoA
-
-    def graph_SoA_history(self):
-        if not self.SoA_history:
-            print("No state history to graph.")
-            return
     
-        # Convert enum to numeric for graphing
-        state_to_value = {
-            state.DROWSY: 0,
-            state.DISTRACTED: 1,
-            state.ATTENTIVE: 2
-        }
+    def SoA_percentages(self):
+        attentive_time = 0
+        inattentive_time = 0
 
-        times = [t - self.SoA_history[0][0] for (t, s) in self.SoA_history]
-        values = [state_to_value[s] for (_, s) in self.SoA_history]
+        for i in range(1, len(self.SoA_history)):
+            t_prev, state_prev = self.SoA_history[i-1]
+            t_curr, _ = self.SoA_history[i]
 
-        plt.figure(figsize=(10, 4))
-        plt.plot(times, values, linewidth=2)
+            duration = t_curr - t_prev
 
-        plt.yticks([0, 1, 2], ["DROWSY", "DISTRACTED", "ATTENTIVE"])
-        plt.xlabel("Time (s)")
-        plt.ylabel("State of Attention")
-        plt.title("Attention State Timeline")
-        plt.grid(True)
+            if state_prev == state.ATTENTIVE:
+                attentive_time += duration
+            elif state_prev == state.INATTENTIVE:
+                inattentive_time += duration
 
-        plt.show(block=True)
+        total_time = attentive_time + inattentive_time
+        if total_time == 0:
+            return (0, 0)
+
+        attentive_percentage = (attentive_time / total_time) * 100
+        inattentive_percentage = (inattentive_time / total_time) * 100
+
+        return (total_time, attentive_percentage, inattentive_percentage)
+    
+    def process_time(self):
+        total_time, _, _ = self.SoA_percentages()
+        # hours: 
+        hours = int(total_time // 3600)
+        # minutes:
+        minutes = int((total_time % 3600) // 60)
+        # seconds:
+        seconds = int(total_time % 60)
+        return (hours, minutes, seconds)
+
+    def print_stats(self):
+        # percentages
+        (_, attentive_percentage, inattentive_percentage) = self.SoA_percentages()
+        hours, minutes, seconds = self.process_time()
+        self.logger.info(f"Total Time Monitored: Hours: {hours}, Minutes: {minutes}, Seconds: {seconds}")
+        self.logger.info(f"Attentive Percentage: {attentive_percentage:.2f}%")
+        self.logger.info(f"Inattentive Percentage: {inattentive_percentage:.2f}%")
+        # inattentive count
+        self.logger.info(f"Inattentive Count: {self.inattentive_count}")
+
+
+# unused as of now
+    # def graph_SoA_history(self):
+    #     if not self.SoA_history:
+    #         print("No state history to graph.")
+    #         return
+    
+    #     # Convert enum to numeric for graphing
+    #     state_to_value = {
+    #         state.DROWSY: 0,
+    #         state.DISTRACTED: 1,
+    #         state.ATTENTIVE: 2
+    #     }
+
+    #     times = [t - self.SoA_history[0][0] for (t, s) in self.SoA_history]
+    #     values = [state_to_value[s] for (_, s) in self.SoA_history]
+
+    #     plt.figure(figsize=(10, 4))
+    #     plt.plot(times, values, linewidth=2)
+
+    #     plt.yticks([0, 1, 2], ["DROWSY", "DISTRACTED", "ATTENTIVE"])
+    #     plt.xlabel("Time (s)")
+    #     plt.ylabel("State of Attention")
+    #     plt.title("Attention State Timeline")
+    #     plt.grid(True)
+
+    #     plt.show(block=True) 
+
