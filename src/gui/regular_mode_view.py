@@ -4,12 +4,16 @@ from controller.regular_mode_controller import RegularModeController
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt
 
+from controller.facial_imaging_controller import FacialImagingController
+
 class RegularTimerView(QWidget):
     def __init__(self):
         super().__init__()
 
         self.model = RegularModeModel()
         self.controller = RegularModeController()
+
+        self.face_controller = FacialImagingController()
 
         self.init_ui()
 
@@ -23,11 +27,11 @@ class RegularTimerView(QWidget):
         # Start button
         self.start_button = QPushButton("Start")
         self.start_button.setFixedSize(200, 60)
-        self.start_button.clicked.connect(self.controller.start_regular_mode) # connect it to the controller
+        self.start_button.clicked.connect(self.face_controller.start) # connect it to the controller
         layout.addWidget(self.start_button, alignment=Qt.AlignCenter)
 
         # Stop button
-        self.start_button = QPushButton("Stop")
-        self.start_button.setFixedSize(200, 60)
-        self.start_button.clicked.connect(self.controller.stop_regular_mode) # connect it to the controller
-        layout.addWidget(self.start_button, alignment=Qt.AlignCenter)
+        self.stop_button = QPushButton("Stop")
+        self.stop_button.setFixedSize(200, 60)
+        self.stop_button.clicked.connect(self.face_controller.stop) # connect it to the controller
+        layout.addWidget(self.stop_button, alignment=Qt.AlignCenter)
