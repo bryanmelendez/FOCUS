@@ -1,17 +1,28 @@
-from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
 from PySide6.QtCore import Qt, Signal
 
 class RegularTimerView(QWidget):
 
     toggle_clicked = Signal()
     end_clicked = Signal()
+    home_clicked = Signal()
 
     def __init__(self):
         super().__init__()
         self.init_ui()
 
     def init_ui(self):
+
         layout = QVBoxLayout()
+        top_bar = QHBoxLayout()
+
+        self.home_button = QPushButton("Home")
+        self.home_button.setFixedSize(80, 40)
+
+        top_bar.addWidget(self.home_button)
+        top_bar.addStretch()  # pushes button to the left
+
+        layout.addLayout(top_bar)
 
         self.title_label = QLabel("Regular Session")
         self.title_label.setAlignment(Qt.AlignCenter)
@@ -38,6 +49,10 @@ class RegularTimerView(QWidget):
 
         self.toggle_button.clicked.connect(lambda: self.toggle_clicked.emit())
         self.stop_button.clicked.connect(lambda: self.end_clicked.emit())
+        self.home_button.clicked.connect(self.home_clicked)
+
+    def home_clicked(self):
+        self.home_clicked.emit()
 
     def set_running(self, running: bool):
         if running:

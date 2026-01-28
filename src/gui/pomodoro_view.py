@@ -5,21 +5,30 @@ class PomodoroView(QWidget):
 
     toggle_clicked = Signal()
     end_clicked = Signal()
-    mode_changed = Signal(str)  # Signal to indicate mode change
+    mode_changed = Signal(str)
+    home_clicked = Signal()
 
     def __init__(self):
         super().__init__()
         self.init_ui()
 
     def init_ui(self):
-
         layout = QVBoxLayout()
+
+        top_bar = QHBoxLayout()
+
+        self.home_button = QPushButton("Home")
+        self.home_button.setFixedSize(80, 40)
+
+        top_bar.addWidget(self.home_button)
+        top_bar.addStretch()  # pushes button to the left
+
+        layout.addLayout(top_bar)
 
         self.title_label = QLabel("Pomodoro Timer")
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setStyleSheet("font-size: 48px; font-weight: bold;")
         layout.addWidget(self.title_label)
-
 
         mode_layout = QHBoxLayout()
 
@@ -62,6 +71,7 @@ class PomodoroView(QWidget):
         self.short_button.clicked.connect(lambda:self.mode_changed.emit("s_break"))
         self.long_button.clicked.connect(lambda: self.mode_changed.emit("l_break"))
         self.end_button.clicked.connect(lambda: self.end_clicked.emit())
+        self.home_button.clicked.connect(self.home_clicked)
 
     def set_running(self, running: bool):
         if running:
@@ -78,3 +88,6 @@ class PomodoroView(QWidget):
         if self.mode == "work":
             self.mode = "break"
             self.title_label.setText("Break Time")
+
+    def home_clicked(self):
+        self.home_clicked.emit()

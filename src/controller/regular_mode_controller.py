@@ -23,6 +23,7 @@ class RegularModeController:
         # Connect view signals → controller logic
         self.view.toggle_clicked.connect(self.handle_start_toggle) 
         self.view.end_clicked.connect(self.handle_end)
+        self.view.home_button.clicked.connect(self.handle_end)
         self.sync_view()
     
     def sync_view(self):

@@ -26,6 +26,11 @@ class MainWindow(QMainWindow):
         # Connect button click to switch view
         self.home_page.pomodoro_button.clicked.connect(self.show_pomodoro)
         self.home_page.regular_button.clicked.connect(self.show_regular)
+        self.regular_view.home_button.clicked.connect(self.show_home)
+        self.pomodoro_view.home_button.clicked.connect(self.show_home)
+
+    def show_home(self):
+        self.stacked.setCurrentIndex(0)  # Show HomePage
 
     def show_pomodoro(self):
         self.stacked.setCurrentIndex(1)  # Show PomodoroView

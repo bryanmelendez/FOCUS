@@ -24,6 +24,7 @@ class PomodoroController:
         self.view.toggle_clicked.connect(self.handle_start_toggle)
         self.view.end_clicked.connect(self.handle_end)
         self.view.mode_changed.connect(self.change_mode)    
+        self.view.home_button.clicked.connect(self.handle_end)
 
         self.sync_view()
     
