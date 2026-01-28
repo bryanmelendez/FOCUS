@@ -9,4 +9,4 @@ class FacialImagingModel():
         self.face_detector = FaceDetector()
         self.landmark_processor = LandmarkProcessor()
         self.logger = Logger()
-        self.cap: cv2.VideoCapture | None = None
+        self.cap = None

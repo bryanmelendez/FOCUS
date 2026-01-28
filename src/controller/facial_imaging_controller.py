@@ -50,6 +50,7 @@ class FacialImagingWorker(QObject):
     def deinitialize_imaging(self):
         if self.model.cap.isOpened():
             self.model.cap.release()
+            self.model.cap = None
         return
 
     def process_facial_image(self):
