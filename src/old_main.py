@@ -9,7 +9,12 @@ from time import time, sleep
 from datetime import datetime
 from utils.logger import Logger
 
+from PySide6.QtWidgets import QApplication
+from gui.stats_window import StatsWindow
+
 def main():
+    app = QApplication(sys.argv)
+
     face_detector = FaceDetector()
     logger = Logger()
     frames_dir = f"{logger.log_path}/frames"
@@ -115,10 +120,28 @@ def main():
             
     except KeyboardInterrupt:
         print("\nStopping camera feed...")
+        plt.close('all')
+        landmark_processor.print_stats()
+        total_time, att_pct, inatt_pct = landmark_processor.SoA_percentages()
+        label = landmark_processor.qualitative_label()
+        (attentive_time, inattentive_time) = landmark_processor.SoA_times()
+
+        dialog = StatsWindow(
+            total_time=landmark_processor.process_time(total_time),
+            attentive_percentage=att_pct,
+            inattentive_percentage=inatt_pct,
+            attentive_time = landmark_processor.process_time(attentive_time), 
+            inattentive_time = landmark_processor.process_time(inattentive_time),
+            inattentive_count=landmark_processor.inattentive_count,
+            qualitative_label=label,
+            parent=None
+        )
+
+        dialog.exec()
+
     finally:
         cap.release()
         cv2.destroyAllWindows()
-        plt.close('all')
         print("Camera released")
 
 if __name__ == "__main__":

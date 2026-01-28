@@ -3,7 +3,6 @@ import numpy as np
 import time
 from collections import deque
 from enum import Enum
-import matplotlib.pyplot as plt
 import math
 from utils.logger import Logger
 
@@ -87,7 +86,8 @@ class LandmarkProcessor:
         self.currentState = self.prevState = state.ATTENTIVE
         self.state_start_time = None
         self.inattentive_alert_time = 5 # seconds
-        self.attentive_reset_time = 5 # seconds
+        self.attentive_reset_time = 5 # seconds - do we need ?
+        self.longest_attentive_streak = 0 # duration
         self.inattentive_flag = False
         self.inattentive_count = 0
         self.SoA_history = []
@@ -295,14 +295,14 @@ class LandmarkProcessor:
         if -7 < dx < 7 and -3 < dy < 3: # TODO - find the actual threshold
             return "Center"
 
-        if 135 <= theta <= 180 or -180 <= theta <= -135:
+        if -45 <= theta < 45:
             return "Right"
-        if -135 < theta <= -45:
-            return "Up"
-        if 0 <= theta < 45 or 0 > theta > -45:
-            return "Left"
         if 45 <= theta < 135:
             return "Down"
+        if theta >= 135 or theta < -135:
+            return "Left"
+        if -135 <= theta < -45:
+            return "Up"
 
     def compute_gaze(self, landmarks, frame_shape):
         h, w, _ = frame_shape
@@ -386,8 +386,6 @@ class LandmarkProcessor:
         self.SoA_history.append((time.time(), self.currentState)) # should it be every second ?
         return self.currentState
     
-        
-    
     def processSoA(self, landmarks, frame_shape):
         current_time = time.time()
 
@@ -397,6 +395,7 @@ class LandmarkProcessor:
         # if first run, initialize timer
         if self.state_start_time is None:
             self.state_start_time = current_time
+            longest_attentive_streak_start = current_time
             self.SoA_history.append((current_time, self.currentState))
 
         # DEBUG
@@ -412,11 +411,15 @@ class LandmarkProcessor:
 
         if currentSoA == state.INATTENTIVE and duration > self.inattentive_alert_time:
             if self.inattentive_flag == False:
+                # self.longest_attentive_streak = max(self.longest_attentive_streak, (current_time - longest_attentive_streak_start))
                 self.inattentive_flag = True
                 self.inattentive_count += 1
+                # self.SoA_history.append((current_time, currentSoA))
                 self.logger.info("INATTENTIVE ALERT")
         elif currentSoA == state.ATTENTIVE:
+            # if self.inattentive_flag == True:
             self.inattentive_flag = False
+            #     self.SoA_history.append((current_time, currentSoA))
 
         return results, currentSoA
     
@@ -439,30 +442,73 @@ class LandmarkProcessor:
         if total_time == 0:
             return (0, 0)
 
-        attentive_percentage = (attentive_time / total_time) * 100
-        inattentive_percentage = (inattentive_time / total_time) * 100
+        attentive_percentage = round((attentive_time / total_time) * 100)
+        inattentive_percentage = round((inattentive_time / total_time) * 100)
 
         return (total_time, attentive_percentage, inattentive_percentage)
     
-    def process_time(self):
-        total_time, _, _ = self.SoA_percentages()
+    def SoA_times(self):
+        attentive_time = 0
+        inattentive_time = 0
+
+        for i in range(1, len(self.SoA_history)):
+            t_prev, state_prev = self.SoA_history[i-1]
+            t_curr, _ = self.SoA_history[i]
+
+            duration = t_curr - t_prev
+
+            if state_prev == state.ATTENTIVE:
+                attentive_time += duration
+            elif state_prev == state.INATTENTIVE:
+                inattentive_time += duration
+
+        return (attentive_time, inattentive_time)
+    
+    def qualitative_label(self):
+        _, attentive_percentage, _ = self.SoA_percentages()
+
+        if attentive_percentage >= 90:
+            return "Excellent Focus"
+        elif attentive_percentage >= 75:
+            return "Good Focus"
+        elif attentive_percentage >= 60:
+            return "Low Focus"
+        else:
+            return "Very Low Focus"
+    
+    def process_time(self, time):
         # hours: 
-        hours = int(total_time // 3600)
+        hours = int(time // 3600)
         # minutes:
-        minutes = int((total_time % 3600) // 60)
+        minutes = int((time % 3600) // 60)
         # seconds:
-        seconds = int(total_time % 60)
+        seconds = int(time % 60)
         return (hours, minutes, seconds)
 
     def print_stats(self):
+        # self.finalize_SoA()
         # percentages
-        (_, attentive_percentage, inattentive_percentage) = self.SoA_percentages()
-        hours, minutes, seconds = self.process_time()
+        (total_time, attentive_percentage, inattentive_percentage) = self.SoA_percentages()
+        (attentive_time, inattentive_time) = self.SoA_times()
+        # times
+        hours, minutes, seconds = self.process_time(total_time)
+        attentive_hours, attentive_minutes, attentive_seconds = self.process_time(attentive_time)
+        inattentive_hours, inattentive_minutes, inattentive_seconds = self.process_time(inattentive_time)
+        longest_hours, longest_minutes, longest_seconds = self.process_time(self.longest_attentive_streak)
+        #debug
+        # print("longest attentive streak (s): ", self.longest_attentive_streak)
+        # print stats
         self.logger.info(f"Total Time Monitored: Hours: {hours}, Minutes: {minutes}, Seconds: {seconds}")
         self.logger.info(f"Attentive Percentage: {attentive_percentage:.2f}%")
         self.logger.info(f"Inattentive Percentage: {inattentive_percentage:.2f}%")
+
+        # self.logger.info(f"Longest Attentive Streak: Hours: {longest_hours}, Minutes: {longest_minutes}, Seconds: {longest_seconds}")
+        self.logger.info(f"Attentive Time: Hours: {attentive_hours}, Minutes: {attentive_minutes}, Seconds: {attentive_seconds}")
+        self.logger.info(f"Inattentive Time: Hours: {inattentive_hours}, Minutes: {inattentive_minutes}, Seconds: {inattentive_seconds}")
         # inattentive count
         self.logger.info(f"Inattentive Count: {self.inattentive_count}")
+        # label
+        self.logger.info(f"Focus Label: {self.qualitative_label()}")
 
 
 # unused as of now
@@ -491,4 +537,3 @@ class LandmarkProcessor:
     #     plt.grid(True)
 
     #     plt.show(block=True) 
-
