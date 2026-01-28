@@ -4,6 +4,7 @@ from PySide6.QtCore import Qt, Signal
 class PomodoroView(QWidget):
 
     toggle_clicked = Signal()
+    end_clicked = Signal()
     mode_changed = Signal(str)  # Signal to indicate mode change
 
     def __init__(self):
@@ -50,13 +51,17 @@ class PomodoroView(QWidget):
         self.toggle_button.setFixedSize(200, 60)
         layout.addWidget(self.toggle_button, alignment=Qt.AlignCenter)
 
+        self.end_button = QPushButton("End Session")
+        self.end_button.setFixedSize(200, 60)
+        layout.addWidget(self.end_button, alignment=Qt.AlignCenter)
+
         self.setLayout(layout)
 
         self.toggle_button.clicked.connect(lambda: self.toggle_clicked.emit())
         self.work_button.clicked.connect(lambda: self.mode_changed.emit("work"))
         self.short_button.clicked.connect(lambda:self.mode_changed.emit("s_break"))
         self.long_button.clicked.connect(lambda: self.mode_changed.emit("l_break"))
-
+        self.end_button.clicked.connect(lambda: self.end_clicked.emit())
 
     def set_running(self, running: bool):
         if running:
@@ -73,4 +78,3 @@ class PomodoroView(QWidget):
         if self.mode == "work":
             self.mode = "break"
             self.title_label.setText("Break Time")
-            

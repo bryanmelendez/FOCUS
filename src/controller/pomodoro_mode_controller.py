@@ -16,6 +16,7 @@ class PomodoroController:
 
         # Connect view signals → controller logic
         self.view.toggle_clicked.connect(self.handle_start_toggle)
+        self.view.end_clicked.connect(self.handle_end)
         self.view.mode_changed.connect(self.change_mode)    
 
         self.sync_view()
@@ -29,6 +30,12 @@ class PomodoroController:
             self.pause()
         else:
             self.start()
+
+    def handle_end(self):
+        self.timer.stop()
+        self.model.is_running = False
+        self.model.remaining_time = self.model.modes[self.model.current_mode]
+        self.sync_view()
 
     def start(self):
         self.model.is_running = True
