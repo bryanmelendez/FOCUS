@@ -1,3 +1,4 @@
 class RegularModeModel:
-    def __init__(self) -> None:
-        self.test = "Hello"
+    def __init__(self):
+        self.time  = 0
+        self.is_running = False
