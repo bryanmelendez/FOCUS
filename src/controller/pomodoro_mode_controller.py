@@ -111,5 +111,8 @@ class PomodoroController:
         
     def change_mode(self, mode: str):
          self.timer.stop()
+
+         self.face_controller.stop()
+
          self.model.set_mode(mode)
          self.sync_view()
