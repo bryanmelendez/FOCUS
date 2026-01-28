@@ -2,10 +2,12 @@ from model.regular_mode_model import RegularModeModel
 from PySide6.QtCore import QTimer
 
 from controller.facial_imaging_controller import FacialImagingController
+from utils.notification import NotificationManager
 
 class RegularModeController:
     def __init__(self, model, view):
         self.face_controller = FacialImagingController()
+        self.notification_manager = NotificationManager()
 
         self.model = model
         self.view = view
@@ -36,6 +38,12 @@ class RegularModeController:
     def handle_end(self):
         self.timer.stop()
         self.face_controller.stop()
+        
+        # Show notification
+        self.notification_manager.show_notification(
+            "Session Ended",
+            "Focus session completed!"
+        )
 
         self.model.is_running = False
         self.model.time = 0
@@ -46,6 +54,12 @@ class RegularModeController:
         self.timer.start()
 
         self.face_controller.start()
+        
+        # Show notification
+        self.notification_manager.show_notification(
+            "Focus Session Started",
+            "Your focus session has begun. Stay concentrated!"
+        )
 
         # Tell the view to update the button text
         self.view.set_running(True)
@@ -55,6 +69,12 @@ class RegularModeController:
         self.timer.stop()
 
         self.face_controller.stop()
+        
+        # Show notification
+        self.notification_manager.show_notification(
+            "Session Paused",
+            "Your focus session has been paused."
+        )
 
         # Update the view
         self.view.set_running(False)
