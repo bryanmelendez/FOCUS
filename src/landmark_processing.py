@@ -83,6 +83,8 @@ class LandmarkProcessor:
         self.head_pose_start_time = None
         # Gaze values
         self.gaze_direction_start_time = None
+        self.gaze_history_left = deque(maxlen=10)  # Store last 10 gaze directions for left eye
+        self.gaze_history_right = deque(maxlen=10) # Store last 10 gaze directions for right eye
         # SoA
         self.currentState = self.prevState = state.ATTENTIVE
         self.state_start_time = None
@@ -303,6 +305,19 @@ class LandmarkProcessor:
             return "Left"
         if 45 <= theta < 135:
             return "Down"
+    
+    def get_majority_gaze(self, gaze_history):
+        """Calculate the majority vote from recent gaze directions."""
+        if len(gaze_history) == 0:
+            return "Center"
+        
+        # Count occurrences of each direction
+        from collections import Counter
+        direction_counts = Counter(gaze_history)
+        
+        # Return the most common direction
+        majority_direction = direction_counts.most_common(1)[0][0]
+        return majority_direction
 
     def compute_gaze(self, landmarks, frame_shape):
         h, w, _ = frame_shape
@@ -314,8 +329,17 @@ class LandmarkProcessor:
             landmarks, RIGHT_EYE_CORNERS, RIGHT_EYE_LIDS, RIGHT_IRIS, w, h 
         )
 
-        gaze_left = self.classify_gaze_direction(left_eye)
-        gaze_right = self.classify_gaze_direction(right_eye)
+        # Get raw classifications
+        gaze_left_raw = self.classify_gaze_direction(left_eye)
+        gaze_right_raw = self.classify_gaze_direction(right_eye)
+        
+        # Add to history
+        self.gaze_history_left.append(gaze_left_raw)
+        self.gaze_history_right.append(gaze_right_raw)
+        
+        # Get majority vote from history
+        gaze_left = self.get_majority_gaze(self.gaze_history_left)
+        gaze_right = self.get_majority_gaze(self.gaze_history_right)
 
         return (left_eye[0], right_eye[0], gaze_left, gaze_right)
 
