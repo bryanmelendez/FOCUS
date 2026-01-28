@@ -4,8 +4,6 @@ from controller.regular_mode_controller import RegularModeController
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton
 from PySide6.QtCore import Qt, Signal
 
-from controller.facial_imaging_controller import FacialImagingController
-
 class RegularTimerView(QWidget):
 
     toggle_clicked = Signal()
