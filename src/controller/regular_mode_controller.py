@@ -1,8 +1,12 @@
 from model.regular_mode_model import RegularModeModel
 from PySide6.QtCore import QTimer
 
+from controller.facial_imaging_controller import FacialImagingController
+
 class RegularModeController:
     def __init__(self, model, view):
+        self.face_controller = FacialImagingController()
+
         self.model = model
         self.view = view
 
@@ -31,6 +35,8 @@ class RegularModeController:
     
     def handle_end(self):
         self.timer.stop()
+        self.face_controller.stop()
+
         self.model.is_running = False
         self.model.time = 0
         self.sync_view()
@@ -39,12 +45,16 @@ class RegularModeController:
         self.model.is_running = True
         self.timer.start()
 
+        self.face_controller.start()
+
         # Tell the view to update the button text
         self.view.set_running(True)
 
     def pause(self):
         self.model.is_running = False
         self.timer.stop()
+
+        self.face_controller.stop()
 
         # Update the view
         self.view.set_running(False)
