@@ -5,6 +5,8 @@ import cv2
 from model.facial_imaging_model import FacialImagingModel
 from utils.logger import Logger
 
+from controller.stats_window_controller import StatsWindowController
+from model.stats_window_model import StatsWindowModel
 
 class FacialImagingWorker(QObject):
     data_ready = Signal(object)
@@ -16,7 +18,7 @@ class FacialImagingWorker(QObject):
 
         self.model = FacialImagingModel()
         self.logger = Logger()
-
+        
     def start(self):
         if self._running:
             self.logger.warning("Worker already running, ignoring start request")
@@ -88,6 +90,30 @@ class FacialImagingWorker(QObject):
         pose_results, soa = self.model.landmark_processor.processSoA(face_landmarks, frame.shape)
         self.logger.log(pose_results)
 
+    def end_session(self):
+        landmark_processor = self.model.landmark_processor
+        landmark_processor.print_stats()
+        total_time, att_pct, inatt_pct = landmark_processor.SoA_percentages()
+        label = landmark_processor.qualitative_label()
+        (attentive_time, inattentive_time) = landmark_processor.SoA_times()
+        model = StatsWindowModel(
+            total_time=landmark_processor.process_time(total_time),
+            attentive_percentage=att_pct,
+            inattentive_percentage=inatt_pct,
+            attentive_time = landmark_processor.process_time(attentive_time), 
+            inattentive_time = landmark_processor.process_time(inattentive_time),
+            inattentive_count=landmark_processor.inattentive_count,
+            qualitative_label=label
+        )
+        controller = StatsWindowController(model, parent = None)
+        controller.show()
+
+        self.restart_landmark_processor()
+        
+    def restart_landmark_processor(self):
+        old_processor = self.model.landmark_processor
+        self.model.landmark_processor = old_processor.__class__()
+        del old_processor
                 
 class FacialImagingController(QObject):
     def __init__(self):
@@ -118,3 +144,6 @@ class FacialImagingController(QObject):
         
         self.worker.logger.info("Stopping imaging worker")
         self.worker.stop()
+
+    def end_session(self):
+        self.worker.end_session()

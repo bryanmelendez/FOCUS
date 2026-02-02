@@ -57,7 +57,7 @@ class FocusController:
 
     def handle_end(self):
         self.timer.stop()
-        
+ 
         if self.model.mode == "work":
             self.face_controller.stop()
         
@@ -72,6 +72,10 @@ class FocusController:
         self.model.has_started = False
         self.reset_current_mode()
         self.sync_view()
+
+        if self.model.session_ended == False:
+            self.face_controller.end_session()
+            self.model.session_ended = True
 
     def start(self):
         # Prevent starting if already running

@@ -121,6 +121,7 @@ class FocusView(QWidget):
             self.work_button.setChecked(False)
             self.break_button.setChecked(True)
             self.mode_label.setText("Break")
+    
     def home_clicked(self):
         self.home_clicked.emit()
     

@@ -12,6 +12,7 @@ class FocusModel:
         self.remaining_time = self.modes[self.mode]
         self.is_running = False
         self.has_started = False
+        self.session_ended = False
 
     
 
