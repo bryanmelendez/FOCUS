@@ -57,7 +57,9 @@ class FocusController:
 
     def handle_end(self):
         self.timer.stop()
-        self.face_controller.stop()
+        
+        if self.model.mode == "work":
+            self.face_controller.stop()
         
         # Show notification
         mode_name = "Focus" if self.model.mode == "work" else "Break"
@@ -80,7 +82,8 @@ class FocusController:
         self.model.has_started = True
         self.timer.start()
 
-        self.face_controller.start()
+        if self.model.mode == "work":
+            self.face_controller.start()
         
         # Show notification
         mode_name = "Focus" if self.model.mode == "work" else "Break"
@@ -96,7 +99,8 @@ class FocusController:
         self.model.is_running = False
         self.timer.stop()
         
-        self.face_controller.stop()
+        if self.model.mode == "work":
+            self.face_controller.stop()
         
         # Show notification
         mode_name = "Focus" if self.model.mode == "work" else "Break"
