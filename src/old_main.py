@@ -10,7 +10,9 @@ from datetime import datetime
 from utils.logger import Logger
 
 from PySide6.QtWidgets import QApplication
-from gui.stats_window import StatsWindow
+from model.stats_window_model import StatsWindowModel
+from controller.stats_window_controller import StatsWindowController
+
 
 def main():
     app = QApplication(sys.argv)
@@ -121,23 +123,22 @@ def main():
     except KeyboardInterrupt:
         print("\nStopping camera feed...")
         plt.close('all')
+        # all the stat processing goes here
         landmark_processor.print_stats()
         total_time, att_pct, inatt_pct = landmark_processor.SoA_percentages()
         label = landmark_processor.qualitative_label()
         (attentive_time, inattentive_time) = landmark_processor.SoA_times()
-
-        dialog = StatsWindow(
+        model = StatsWindowModel(
             total_time=landmark_processor.process_time(total_time),
             attentive_percentage=att_pct,
             inattentive_percentage=inatt_pct,
             attentive_time = landmark_processor.process_time(attentive_time), 
             inattentive_time = landmark_processor.process_time(inattentive_time),
             inattentive_count=landmark_processor.inattentive_count,
-            qualitative_label=label,
-            parent=None
+            qualitative_label=label
         )
-
-        dialog.exec()
+        controller = StatsWindowController(model, parent = None)
+        controller.show()
 
     finally:
         cap.release()
