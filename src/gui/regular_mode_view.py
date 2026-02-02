@@ -12,7 +12,6 @@ class RegularTimerView(QWidget):
         self.init_ui()
 
     def init_ui(self):
-
         layout = QVBoxLayout()
         top_bar = QHBoxLayout()
 
