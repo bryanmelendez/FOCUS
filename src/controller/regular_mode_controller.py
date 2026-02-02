@@ -51,6 +51,10 @@ class RegularModeController:
         self.sync_view()
 
     def start(self):
+        # Prevent starting if already running
+        if self.model.is_running or self.face_controller.worker_thread.isRunning():
+            return
+            
         self.model.is_running = True
         self.timer.start()
 
