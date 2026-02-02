@@ -35,7 +35,7 @@ class FreeModeController:
             self.pause()
         else:
             self.start()
-    
+        
     def handle_end(self):
         self.timer.stop()
         self.face_controller.stop()
@@ -49,6 +49,8 @@ class FreeModeController:
         self.model.is_running = False
         self.model.time = 0
         self.sync_view()
+
+        self.face_controller.end_session()
 
     def start(self):
         # Prevent starting if already running

@@ -73,9 +73,7 @@ class FocusController:
         self.reset_current_mode()
         self.sync_view()
 
-        if self.model.session_ended == False:
-            self.face_controller.end_session()
-            self.model.session_ended = True
+        self.face_controller.end_session()
 
     def start(self):
         # Prevent starting if already running
