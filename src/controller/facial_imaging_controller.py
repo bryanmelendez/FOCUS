@@ -18,10 +18,19 @@ class FacialImagingWorker(QObject):
         self.logger = Logger()
 
     def start(self):
+        if self._running:
+            self.logger.warning("Worker already running, ignoring start request")
+            return
+            
         self._running = True
+        self.initialize_imaging()
         self._loop()
 
     def stop(self):
+        if not self._running:
+            self.logger.warning("Worker not running, ignoring stop request")
+            return
+            
         self._running = False
 
     def _loop(self):
@@ -32,6 +41,7 @@ class FacialImagingWorker(QObject):
             self.data_ready.emit(result)
             sleep(interval)
 
+        self.deinitialize_imaging()
         self.finished.emit()
 
     def do_work(self):
@@ -92,22 +102,19 @@ class FacialImagingController(QObject):
         self.worker.finished.connect(self.worker_thread.quit)
 
     def start(self):
-        # Call init functions
-        ret = self.worker.initialize_imaging()
-        if ret:
-            self.worker.logger.error("Failed to initialize imaging")
+        # Prevent multiple simultaneous starts
+        if self.worker_thread.isRunning():
+            self.worker.logger.warning("Imaging worker thread already running, ignoring start request")
             return
 
-        if not self.worker_thread.isRunning():
-            self.worker.logger.info("Starting imaging worker")
-            self.worker_thread.start()
-        else:
-            self.worker.logger.error("Imaging worker already running")
+        self.worker.logger.info("Starting imaging worker")
+        self.worker_thread.start()
 
     def stop(self):
-        ret = self.worker.deinitialize_imaging()
-        if ret:
-            self.worker.logger.error("Failed to deinitialze imaging")
-
+        # Prevent multiple simultaneous stops
+        if not self.worker_thread.isRunning():
+            self.worker.logger.warning("Imaging worker thread not running, ignoring stop request")
+            return
+        
         self.worker.logger.info("Stopping imaging worker")
         self.worker.stop()
