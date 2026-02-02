@@ -48,9 +48,9 @@ class FreeTimerView(QWidget):
 
         self.toggle_button.clicked.connect(lambda: self.toggle_clicked.emit())
         self.stop_button.clicked.connect(lambda: self.end_clicked.emit())
-        self.home_button.clicked.connect(self.home_clicked)
+        self.home_button.clicked.connect(self.emit_home_clicked)
 
-    def home_clicked(self):
+    def emit_home_clicked(self):
         self.home_clicked.emit()
 
     def set_running(self, running: bool):

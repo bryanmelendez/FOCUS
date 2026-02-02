@@ -94,7 +94,7 @@ class FocusView(QWidget):
         self.work_button.clicked.connect(lambda: self.mode_changed.emit("work"))
         self.break_button.clicked.connect(lambda:self.mode_changed.emit("break"))
         self.end_button.clicked.connect(lambda: self.end_clicked.emit())
-        self.home_button.clicked.connect(self.home_clicked)
+        self.home_button.clicked.connect(self.emit_home_clicked)
         self.settings_button.clicked.connect(lambda: self.settings_clicked.emit())
 
     def set_running(self, running: bool):
@@ -122,7 +122,7 @@ class FocusView(QWidget):
             self.break_button.setChecked(True)
             self.mode_label.setText("Break")
     
-    def home_clicked(self):
+    def emit_home_clicked(self):
         self.home_clicked.emit()
     
     def update_controls(self, is_running: bool, has_started: bool):

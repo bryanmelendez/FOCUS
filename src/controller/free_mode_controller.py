@@ -50,10 +50,6 @@ class FreeModeController:
         self.model.time = 0
         self.sync_view()
 
-        if self.model.session_ended == False:
-            self.face_controller.end_session()
-            self.model.session_ended = True
-
     def start(self):
         # Prevent starting if already running
         if self.model.is_running or self.face_controller.worker_thread.isRunning():
