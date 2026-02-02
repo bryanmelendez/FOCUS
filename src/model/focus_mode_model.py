@@ -1,6 +1,6 @@
 # model.py
 
-class PomodoroModel:
+class FocusModel:
 
     def __init__(self):
         self.modes = {

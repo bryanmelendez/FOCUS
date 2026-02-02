@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import (QDialog, QHBoxLayout, QVBoxLayout, QHBoxLayout, QLabel, QSpinBox, QPushButton, QDialog)
 
-class PomodoroSettingsDialog(QDialog):
+class FocusSettingsDialog(QDialog):
     def __init__(self, work, break_time):
         super().__init__()
-        self.setWindowTitle("Pomodoro Settings")
+        self.setWindowTitle("FOCUS Settings")
 
         # Main vertical layout
         layout = QVBoxLayout()

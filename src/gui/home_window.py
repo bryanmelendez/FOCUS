@@ -14,16 +14,16 @@ class HomePage(QWidget):
         self.welcome_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.welcome_label)
 
-        # Regular mode button
-        self.regular_button = QPushButton("Regular Mode")
-        self.regular_button.setFixedSize(200, 60)
-        layout.addWidget(self.regular_button, alignment=Qt.AlignCenter)
+        # Free mode button
+        self.free_button = QPushButton("Free Study")
+        self.free_button.setFixedSize(200, 60)
+        layout.addWidget(self.free_button, alignment=Qt.AlignCenter)
 
-        # Pomodoro button
-        self.pomodoro_button = QPushButton("Pomodoro")
-        self.pomodoro_button.setFixedSize(200, 60)
-        self.pomodoro_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        layout.addWidget(self.pomodoro_button, alignment=Qt.AlignCenter)
+        # FOCUS button
+        self.focus_button = QPushButton("FOCUS Mode")
+        self.focus_button.setFixedSize(200, 60)
+        self.focus_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        layout.addWidget(self.focus_button, alignment=Qt.AlignCenter)
 
         # History button
         self.history_button = QPushButton("History")

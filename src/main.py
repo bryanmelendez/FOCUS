@@ -3,10 +3,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PySide6.QtWidgets import QApplication
 from gui.main_window import MainWindow
-from model.pomodoro_mode_model import PomodoroModel
-from model.regular_mode_model import RegularModeModel
-from controller.pomodoro_mode_controller import PomodoroController
-from controller.regular_mode_controller import RegularModeController
+from model.focus_mode_model import FocusModel
+from src.model.free_mode_model import FreeModeModel
+from src.controller.focus_mode_controller import FocusController
+from src.controller.free_mode_controller import FreeModeController
 import sys
 
 app = QApplication(sys.argv)
@@ -14,13 +14,13 @@ app = QApplication(sys.argv)
 # Create the MVC components
 main_window = MainWindow(app_controller=None)
 
-p_model = PomodoroModel()
-p_view = main_window.pomodoro_view
-p_controller = PomodoroController(p_model, p_view)
+p_model = FocusModel()
+p_view = main_window.focus_view
+p_controller = FocusController(p_model, p_view)
 
-r_model = RegularModeModel()
-r_view = main_window.regular_view
-r_controller = RegularModeController(r_model, r_view)
+r_model = FreeModeModel()
+r_view = main_window.free_view
+r_controller = FreeModeController(r_model, r_view)
 
 main_window.show()
 

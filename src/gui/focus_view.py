@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QHBoxLayout, QSpacerItem, QSizePolicy
 from PySide6.QtCore import Qt, Signal
 
-class PomodoroView(QWidget):
+class FocusView(QWidget):
 
     toggle_clicked = Signal()
     end_clicked = Signal()
@@ -30,7 +30,7 @@ class PomodoroView(QWidget):
 
         layout.addLayout(top_bar)
 
-        self.title_label = QLabel("Pomodoro Timer")
+        self.title_label = QLabel("FOCUS Mode")
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setStyleSheet("font-size: 48px; font-weight: bold;")
         layout.addWidget(self.title_label)

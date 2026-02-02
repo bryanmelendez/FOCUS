@@ -1,10 +1,10 @@
-from model.regular_mode_model import RegularModeModel
+from model.free_mode_model import FreeModeModel
 from PySide6.QtCore import QTimer
 
 from controller.facial_imaging_controller import FacialImagingController
 from utils.notification import NotificationManager
 
-class RegularModeController:
+class FreeModeController:
     def __init__(self, model, view):
         self.face_controller = FacialImagingController()
         self.notification_manager = NotificationManager()

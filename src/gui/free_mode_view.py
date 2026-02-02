@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QPushButton, QHBoxLayout
 from PySide6.QtCore import Qt, Signal
 
-class RegularTimerView(QWidget):
+class FreeTimerView(QWidget):
 
     toggle_clicked = Signal()
     end_clicked = Signal()
@@ -23,7 +23,7 @@ class RegularTimerView(QWidget):
 
         layout.addLayout(top_bar)
 
-        self.title_label = QLabel("Regular Session")
+        self.title_label = QLabel("Free Study")
         self.title_label.setAlignment(Qt.AlignCenter)
         self.title_label.setStyleSheet("font-size: 48px; font-weight: bold;")
         layout.addWidget(self.title_label)

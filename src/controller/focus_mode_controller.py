@@ -1,10 +1,10 @@
 from PySide6.QtCore import QTimer
 
 from controller.facial_imaging_controller import FacialImagingController
-from gui.pomodoro_settings_dialog import PomodoroSettingsDialog
+from gui.focus_settings_dialog import FocusSettingsDialog
 from utils.notification import NotificationManager
 
-class PomodoroController:
+class FocusController:
     def __init__(self, model, view):
         self.face_controller = FacialImagingController()
         self.notification_manager = NotificationManager()
@@ -63,7 +63,7 @@ class PomodoroController:
         mode_name = "Focus" if self.model.mode == "work" else "Break"
         self.notification_manager.show_notification(
             "Session Ended",
-            f"Pomodoro {mode_name.lower()} session completed!"
+            f"FOCUS {mode_name.lower()} session completed!"
         )
 
         self.model.is_running = False
@@ -81,7 +81,7 @@ class PomodoroController:
         # Show notification
         mode_name = "Focus" if self.model.mode == "work" else "Break"
         self.notification_manager.show_notification(
-            f"Pomodoro {mode_name} Started",
+            f"FOCUS {mode_name} Started",
             f"Your {mode_name.lower()} session has begun!"
         )
 
@@ -97,7 +97,7 @@ class PomodoroController:
         # Show notification
         mode_name = "Focus" if self.model.mode == "work" else "Break"
         self.notification_manager.show_notification(
-            f"Pomodoro {mode_name} Paused",
+            f"FOCUS {mode_name} Paused",
             f"Your {mode_name.lower()} session has been paused."
         )
 
@@ -124,7 +124,7 @@ class PomodoroController:
             # Show notification when timer completes
             mode_name = "Focus" if self.model.mode == "work" else "Break"
             self.notification_manager.show_notification(
-                f"Pomodoro {mode_name} Complete",
+                f"FOCUS {mode_name} Complete",
                 f"Your {mode_name.lower()} session is finished!"
             )
     
@@ -132,7 +132,7 @@ class PomodoroController:
 
 
     def open_settings(self):
-        dialog = PomodoroSettingsDialog(
+        dialog = FocusSettingsDialog(
             work=self.model.modes["work"] // 60,
             break_time =self.model.modes["break"] // 60
         )

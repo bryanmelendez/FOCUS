@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
-from gui.pomodoro_view import PomodoroView
-from gui.regular_mode_view import RegularTimerView
+from src.gui.focus_view import FocusView
+from gui.free_mode_view import FreeTimerView
 from gui.home_window import HomePage  # import your new home page widget
 
 class MainWindow(QMainWindow):
@@ -11,29 +11,29 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("FOCUS")
 
         self.home_page = HomePage()
-        self.pomodoro_view = PomodoroView()
-        self.regular_view = RegularTimerView()
+        self.focus_view = FocusView()
+        self.free_view = FreeTimerView()
 
         self.stacked = QStackedWidget()
         self.stacked.addWidget(self.home_page)      # index 0
-        self.stacked.addWidget(self.pomodoro_view)  # index 1
-        self.stacked.addWidget(self.regular_view)   # index 2
+        self.stacked.addWidget(self.focus_view)  # index 1
+        self.stacked.addWidget(self.free_view)   # index 2
 
         self.setCentralWidget(self.stacked)
         
         self.resize(1000, 600)
 
         # Connect button click to switch view
-        self.home_page.pomodoro_button.clicked.connect(self.show_pomodoro)
-        self.home_page.regular_button.clicked.connect(self.show_regular)
-        self.regular_view.home_button.clicked.connect(self.show_home)
-        self.pomodoro_view.home_button.clicked.connect(self.show_home)
+        self.home_page.focus_button.clicked.connect(self.show_focus)
+        self.home_page.free_button.clicked.connect(self.show_free)
+        self.free_view.home_button.clicked.connect(self.show_home)
+        self.focus_view.home_button.clicked.connect(self.show_home)
 
     def show_home(self):
         self.stacked.setCurrentIndex(0)  # Show HomePage
 
-    def show_pomodoro(self):
-        self.stacked.setCurrentIndex(1)  # Show PomodoroView
+    def show_focus(self):
+        self.stacked.setCurrentIndex(1)  # Show FocusView
 
-    def show_regular(self):
-        self.stacked.setCurrentIndex(2)  # Show RegularTimerView
+    def show_free(self):
+        self.stacked.setCurrentIndex(2)  # Show FreeTimerView
