@@ -22,8 +22,8 @@ class FreeModeController:
 
         # Connect view signals → controller logic
         self.view.toggle_clicked.connect(self.handle_start_toggle) 
-        self.view.end_clicked.connect(self.handle_end)
-        self.view.home_button.clicked.connect(self.handle_end)
+        self.view.end_clicked.connect(lambda: self.handle_end(show_stats=True))
+        self.view.home_clicked.connect(self.handle_home)
         self.sync_view()
     
     def sync_view(self):
@@ -36,7 +36,14 @@ class FreeModeController:
         else:
             self.start()
         
-    def handle_end(self):
+    def handle_home(self):
+        """Handle home button click - end session if active, then let view emit home_clicked"""
+        if self.model.has_started:
+            # Session is active, end it without showing stats
+            self.handle_end(show_stats=False)
+        # View will emit home_clicked signal which MainWindow listens to
+        
+    def handle_end(self, show_stats=True):
         self.timer.stop()
         self.face_controller.stop()
         
@@ -47,10 +54,11 @@ class FreeModeController:
         )
 
         self.model.is_running = False
+        self.model.has_started = False
         self.model.time = 0
         self.sync_view()
 
-        self.face_controller.end_session()
+        self.face_controller.end_session(show_stats=show_stats)
 
     def start(self):
         # Prevent starting if already running
@@ -58,6 +66,7 @@ class FreeModeController:
             return
             
         self.model.is_running = True
+        self.model.has_started = True
         self.timer.start()
 
         self.face_controller.start()

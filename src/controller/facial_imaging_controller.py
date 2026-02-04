@@ -90,23 +90,25 @@ class FacialImagingWorker(QObject):
         pose_results, soa = self.model.landmark_processor.processSoA(face_landmarks, frame.shape)
         self.logger.log(pose_results)
 
-    def end_session(self):
+    def end_session(self, show_stats=True):
         landmark_processor = self.model.landmark_processor
         landmark_processor.print_stats()
-        total_time, att_pct, inatt_pct = landmark_processor.SoA_percentages()
-        label = landmark_processor.qualitative_label()
-        (attentive_time, inattentive_time) = landmark_processor.SoA_times()
-        model = StatsWindowModel(
-            total_time=landmark_processor.process_time(total_time),
-            attentive_percentage=att_pct,
-            inattentive_percentage=inatt_pct,
-            attentive_time = landmark_processor.process_time(attentive_time), 
-            inattentive_time = landmark_processor.process_time(inattentive_time),
-            inattentive_count=landmark_processor.inattentive_count,
-            qualitative_label=label
-        )
-        controller = StatsWindowController(model, parent = None)
-        controller.show()
+        
+        if show_stats:
+            total_time, att_pct, inatt_pct = landmark_processor.SoA_percentages()
+            label = landmark_processor.qualitative_label()
+            (attentive_time, inattentive_time) = landmark_processor.SoA_times()
+            model = StatsWindowModel(
+                total_time=landmark_processor.process_time(total_time),
+                attentive_percentage=att_pct,
+                inattentive_percentage=inatt_pct,
+                attentive_time = landmark_processor.process_time(attentive_time), 
+                inattentive_time = landmark_processor.process_time(inattentive_time),
+                inattentive_count=landmark_processor.inattentive_count,
+                qualitative_label=label
+            )
+            controller = StatsWindowController(model, parent = None)
+            controller.show()
 
         self.restart_landmark_processor()
         
@@ -145,5 +147,5 @@ class FacialImagingController(QObject):
         self.worker.logger.info("Stopping imaging worker")
         self.worker.stop()
 
-    def end_session(self):
-        self.worker.end_session()
+    def end_session(self, show_stats=True):
+        self.worker.end_session(show_stats=show_stats)

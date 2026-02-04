@@ -26,8 +26,8 @@ class MainWindow(QMainWindow):
         # Connect button click to switch view
         self.home_page.focus_button.clicked.connect(self.show_focus)
         self.home_page.free_button.clicked.connect(self.show_free)
-        self.free_view.home_button.clicked.connect(self.show_home)
-        self.focus_view.home_button.clicked.connect(self.show_home)
+        self.free_view.home_clicked.connect(self.show_home)
+        self.focus_view.home_clicked.connect(self.show_home)
 
     def show_home(self):
         self.stacked.setCurrentIndex(0)  # Show HomePage

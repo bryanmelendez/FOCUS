@@ -440,7 +440,7 @@ class LandmarkProcessor:
 
         total_time = attentive_time + inattentive_time
         if total_time == 0:
-            return (0, 0)
+            return (0, 0, 0)
 
         attentive_percentage = round((attentive_time / total_time) * 100)
         inattentive_percentage = round((inattentive_time / total_time) * 100)
