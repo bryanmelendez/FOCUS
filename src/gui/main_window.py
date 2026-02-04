@@ -15,12 +15,15 @@ class MainWindow(QMainWindow):
         self.free_view = FreeTimerView()
 
         self.stacked = QStackedWidget()
-        self.stacked.addWidget(self.home_page)      # index 0
+        self.stacked.setStyleSheet("background-color: #262836;")
+
+        self.stacked.addWidget(self.home_page)   # index 0
         self.stacked.addWidget(self.focus_view)  # index 1
         self.stacked.addWidget(self.free_view)   # index 2
 
         self.setCentralWidget(self.stacked)
         
+
         self.resize(1000, 600)
 
         # Connect button click to switch view

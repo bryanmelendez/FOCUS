@@ -7,6 +7,8 @@ from model.focus_mode_model import FocusModel
 from src.model.free_mode_model import FreeModeModel
 from src.controller.focus_mode_controller import FocusController
 from src.controller.free_mode_controller import FreeModeController
+from PySide6.QtGui import QFontDatabase
+
 import sys
 
 app = QApplication(sys.argv)
