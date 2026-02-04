@@ -137,9 +137,11 @@ class FocusController:
                 f"FOCUS {mode_name} Complete",
                 f"Your {mode_name.lower()} session is finished!"
             )
-    
 
-
+            if self.model.mode == "work":
+                self.change_mode(mode="break")
+            else:
+                self.change_mode(mode="work")
 
     def open_settings(self):
         dialog = FocusSettingsDialog(
