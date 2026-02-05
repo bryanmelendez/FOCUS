@@ -26,6 +26,9 @@ class FacialImagingWorker(QObject):
         if self._running:
             self.logger.warning("Worker already running, ignoring start request")
             return
+
+        if self.model.landmark_processor.currentState == self.model.state.PAUSED:
+            self.model.landmark_processor.resume()
             
         self._running = True
         self.initialize_imaging()
@@ -35,7 +38,9 @@ class FacialImagingWorker(QObject):
         if not self._running:
             self.logger.warning("Worker not running, ignoring stop request")
             return
-            
+        
+        self.model.landmark_processor.pause()
+        
         self._running = False
 
     def _loop(self):
@@ -112,6 +117,8 @@ class FacialImagingWorker(QObject):
             controller = StatsWindowController(model, parent = None)
             controller.show()
 
+        # DEBUG
+        self.model.landmark_processor.printHistory()
         self.restart_landmark_processor()
         
     def restart_landmark_processor(self):
