@@ -10,6 +10,7 @@ from utils.logger import Logger
 class state(Enum):
     INATTENTIVE = 1
     ATTENTIVE = 2
+    PAUSED = 3
 
 # Gaze Landmarks
 LEFT_IRIS        = [468, 469, 470, 471, 472]
@@ -91,6 +92,8 @@ class LandmarkProcessor:
         self.inattentive_flag = False
         self.inattentive_count = 0
         self.SoA_history = []
+        # pause
+        self.paused_time = None
     
     def compute_EAR(self, landmarks):
         # define landmarks
@@ -379,11 +382,14 @@ class LandmarkProcessor:
 
         if soa is not None: 
             self.currentState = soa 
-        
         if self.currentState == None:
             self.logger.error("there is no current state!")
 
-        self.SoA_history.append((time.time(), self.currentState)) # should it be every second ?
+        if self.currentState != self.prevState:
+            duration = current_time - self.state_start_time
+            self.SoA_history.append((duration, self.prevState)) 
+            self.state_start_time = current_time
+            self.prevState = self.currentState
         return self.currentState
     
     def processSoA(self, landmarks, frame_shape):
@@ -396,7 +402,7 @@ class LandmarkProcessor:
         if self.state_start_time is None:
             self.state_start_time = current_time
             longest_attentive_streak_start = current_time
-            self.SoA_history.append((current_time, self.currentState))
+            self.SoA_history.append((0, self.currentState))
 
         # DEBUG
         # print("current state: {}".format(currentSoA))
@@ -423,24 +429,31 @@ class LandmarkProcessor:
 
         return results, currentSoA
     
+    def pause(self):
+        self.currentState = state.PAUSED
+        self.paused_time = time.time()
+
+    def resume(self):
+        end_time = time.time()
+        pause_duration = end_time - self.paused_time
+        self.SoA_history.append((pause_duration, self.currentState))
+        self.state_start_time = end_time
+        self.currentState = state.ATTENTIVE
+    
     def SoA_percentages(self):
         attentive_time = 0
         inattentive_time = 0
 
-        for i in range(1, len(self.SoA_history)):
-            t_prev, state_prev = self.SoA_history[i-1]
-            t_curr, _ = self.SoA_history[i]
-
-            duration = t_curr - t_prev
-
-            if state_prev == state.ATTENTIVE:
+        
+        for duration, s in self.SoA_history:
+            if s == state.ATTENTIVE:
                 attentive_time += duration
-            elif state_prev == state.INATTENTIVE:
+            elif s == state.INATTENTIVE:
                 inattentive_time += duration
 
         total_time = attentive_time + inattentive_time
         if total_time == 0:
-            return (0, 0)
+            return (0, 0, 0)
 
         attentive_percentage = round((attentive_time / total_time) * 100)
         inattentive_percentage = round((inattentive_time / total_time) * 100)
@@ -451,15 +464,10 @@ class LandmarkProcessor:
         attentive_time = 0
         inattentive_time = 0
 
-        for i in range(1, len(self.SoA_history)):
-            t_prev, state_prev = self.SoA_history[i-1]
-            t_curr, _ = self.SoA_history[i]
-
-            duration = t_curr - t_prev
-
-            if state_prev == state.ATTENTIVE:
+        for duration, s in self.SoA_history:
+            if s == state.ATTENTIVE:
                 attentive_time += duration
-            elif state_prev == state.INATTENTIVE:
+            elif s == state.INATTENTIVE:
                 inattentive_time += duration
 
         return (attentive_time, inattentive_time)
@@ -510,6 +518,9 @@ class LandmarkProcessor:
         # label
         self.logger.info(f"Focus Label: {self.qualitative_label()}")
 
+    def printHistory(self):
+        for (duration, s) in self.SoA_history:
+            self.logger.info(f"Duration: {duration:.2f} seconds, State: {s}")
 
 # unused as of now
     # def graph_SoA_history(self):
