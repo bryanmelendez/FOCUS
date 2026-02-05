@@ -11,7 +11,6 @@ class state(Enum):
     INATTENTIVE = 1
     ATTENTIVE = 2
     PAUSED = 3
-    PAUSED = 3
 
 # Gaze Landmarks
 LEFT_IRIS        = [468, 469, 470, 471, 472]
@@ -93,8 +92,6 @@ class LandmarkProcessor:
         self.inattentive_flag = False
         self.inattentive_count = 0
         self.SoA_history = []
-        # pause
-        self.paused_time = None
         # pause
         self.paused_time = None
     
@@ -394,11 +391,6 @@ class LandmarkProcessor:
             self.SoA_history.append((duration, self.prevState)) 
             self.state_start_time = current_time
             self.prevState = self.currentState
-        if self.currentState != self.prevState:
-            duration = current_time - self.state_start_time
-            self.SoA_history.append((duration, self.prevState)) 
-            self.state_start_time = current_time
-            self.prevState = self.currentState
         return self.currentState
     
     def processSoA(self, landmarks, frame_shape):
@@ -411,7 +403,6 @@ class LandmarkProcessor:
         if self.state_start_time is None:
             self.state_start_time = current_time
             longest_attentive_streak_start = current_time
-            self.SoA_history.append((0, self.currentState))
             #self.SoA_history.append((0, self.currentState))
 
         # DEBUG
