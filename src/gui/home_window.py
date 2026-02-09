@@ -2,6 +2,7 @@ from PySide6.QtWidgets import QWidget, QPushButton, QVBoxLayout, QLabel, QSizePo
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QFont
 from PySide6.QtGui import QPixmap
+from PySide6.QtGui import QIcon
 
 class HomePage(QWidget):
     def __init__(self):
@@ -14,6 +15,8 @@ class HomePage(QWidget):
         label_font = QFont("Menlo")
         button_font.setWeight(QFont.Medium)
 
+        
+
         free_button_style = """
         QPushButton {
             background-color: #f66e60;
@@ -24,11 +27,11 @@ class HomePage(QWidget):
         }
 
         QPushButton:hover {
-            background-color: #1F6FE0;
+            background-color: #da5e55;
         }
 
         QPushButton:pressed {
-            background-color: #1859B7;
+            background-color: #803d39;
         }
         """
 
@@ -42,11 +45,11 @@ class HomePage(QWidget):
         }
 
         QPushButton:hover {
-            background-color: #1F6FE0;
+            background-color: #3aa18c;
         }
 
         QPushButton:pressed {
-            background-color: #1859B7;
+            background-color: #2f8f7a;
         }
         """
 
@@ -60,31 +63,57 @@ class HomePage(QWidget):
         }
 
         QPushButton:hover {
-            background-color: #1F6FE0;
+            background-color: #343434;
         }
 
         QPushButton:pressed {
-            background-color: #1859B7;
-        }
+            background-color: #232222;
+            }
         """
 
         layout = QVBoxLayout()
 
 
-        self.logo_icon = QLabel()
-        pixmap = QPixmap("assets/pokemon.png")
-        pixmap = pixmap.scaled(
-            48, 48,
-            Qt.KeepAspectRatio,
+        self.logo_button = QPushButton()
+
+        pixmap = QPixmap("assets/pokemon.png").scaled(
+            48, 48, 
+            Qt.KeepAspectRatio, 
             Qt.SmoothTransformation
-        )
-        self.logo_icon.setPixmap(pixmap)
-        layout.addWidget(self.logo_icon)
+            )
+
+        self.logo_button.setIcon(QIcon(pixmap))
+        self.logo_button.setIconSize(pixmap.size())
+        self.logo_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+
+        self.logo_button.setStyleSheet("""
+        QPushButton {
+            border: none;
+            background: transparent;
+            padding: 0px;
+        }
+
+        QPushButton:hover {
+            background: transparent;
+        }
+
+        QPushButton:pressed {
+            background: transparent;
+        }
+
+        QPushButton:focus {
+            outline: none;
+        }
+        """)
+
+
+        layout.addWidget(self.logo_button)
 
         # Welcome label at the top, centered
         self.welcome_label = QLabel("Time to FOCUS ...")
         self.welcome_label.setAlignment(Qt.AlignCenter)
         self.welcome_label.setFont(label_font)
+
         self.welcome_label.setStyleSheet("font-size: 24px;")
         layout.addWidget(self.welcome_label)
 
@@ -94,6 +123,7 @@ class HomePage(QWidget):
 
         # Free mode button
         self.free_button = QPushButton("Free Study")
+        self.free_button.setCursor(Qt.PointingHandCursor)
         self.free_button.setFixedSize(250, 250)
         self.free_button.setFont(button_font)
         self.free_button.setStyleSheet(free_button_style)
@@ -101,6 +131,7 @@ class HomePage(QWidget):
 
         # FOCUS button
         self.focus_button = QPushButton("FOCUS Mode")
+        self.focus_button.setCursor(Qt.PointingHandCursor)
         self.focus_button.setFixedSize(250, 250)
         self.focus_button.setFont(button_font)
         self.focus_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -109,6 +140,7 @@ class HomePage(QWidget):
 
         # History button
         self.history_button = QPushButton("History")
+        self.history_button.setCursor(Qt.PointingHandCursor)
         self.history_button.setFixedSize(250, 250)
         self.history_button.setFont(button_font)
         self.history_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
