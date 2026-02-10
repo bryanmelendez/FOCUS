@@ -8,6 +8,8 @@ from utils.logger import Logger
 from controller.stats_window_controller import StatsWindowController
 from model.stats_window_model import StatsWindowModel
 
+from controller.history_controller import HistoryController
+
 class FacialImagingWorker(QObject):
     data_ready = Signal(object)
     finished = Signal()
@@ -18,6 +20,7 @@ class FacialImagingWorker(QObject):
 
         self.model = FacialImagingModel()
         self.logger = Logger()
+        self.history_controller = HistoryController()
         
     def start(self):
         if self._running:
@@ -45,10 +48,6 @@ class FacialImagingWorker(QObject):
 
         self.deinitialize_imaging()
         self.finished.emit()
-
-    def do_work(self):
-        # Your repeated function
-        print("hello")
 
     def initialize_imaging(self):
         # TODO - initialize this properly
@@ -107,6 +106,9 @@ class FacialImagingWorker(QObject):
                 inattentive_count=landmark_processor.inattentive_count,
                 qualitative_label=label
             )
+
+            self.history_controller.write_session(model)
+
             controller = StatsWindowController(model, parent = None)
             controller.show()
 
