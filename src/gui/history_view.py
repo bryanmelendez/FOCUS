@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import (QWidget, QLabel, QVBoxLayout, QPushButton, 
-                               QScrollArea, QFrame, QHBoxLayout)
+                               QScrollArea, QFrame, QHBoxLayout, QSizePolicy)
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtGui import QPixmap, QIcon, QFont
 
 from controller.history_controller import HistoryController
 
@@ -13,11 +14,26 @@ class HistoryView(QWidget):
         self.controller = HistoryController()
         self.init_ui()
 
+    def showEvent(self, event):
+        """Refresh sessions list when the view is shown"""
+        super().showEvent(event)
+        self.refresh_sessions()
+    
+    def refresh_sessions(self):
+        """Clear and reload the sessions list"""
+        # Clear existing session buttons
+        while self.sessions_layout.count():
+            item = self.sessions_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        
+        # Reload sessions
         self.populate_sessions(self.controller.read_sessions())
 
     def init_ui(self):
         self.setWindowTitle("Session History")
-        self.setFixedSize(500, 600)
+        
+        text_font = QFont("Menlo")
         
         # Main layout
         main_layout = QVBoxLayout(self)
@@ -25,23 +41,60 @@ class HistoryView(QWidget):
         # Top bar with home button
         top_bar = QHBoxLayout()
         
-        self.home_button = QPushButton("Home")
-        self.home_button.setFixedSize(80, 40)
-        self.home_button.clicked.connect(lambda: self.home_clicked.emit())
+        self.logo_button = QPushButton()
+        self.logo_button.setCursor(Qt.PointingHandCursor)
         
-        top_bar.addWidget(self.home_button)
+        pixmap = QPixmap("assets/pokemon.png").scaled(
+            48, 48,
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation
+        )
+        
+        self.logo_button.setIcon(QIcon(pixmap))
+        self.logo_button.setIconSize(pixmap.size())
+        self.logo_button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        
+        self.logo_button.setStyleSheet("""
+        QPushButton {
+            border: none;
+            background: transparent;
+            padding: 0px;
+        }
+        
+        QPushButton:hover {
+            background: transparent;
+        }
+        
+        QPushButton:pressed {
+            background: transparent;
+        }
+        
+        QPushButton:focus {
+            outline: none;
+        }
+        """)
+        
+        self.logo_button.clicked.connect(lambda: self.home_clicked.emit())
+        
+        top_bar.addWidget(self.logo_button, alignment=Qt.AlignLeft)
         top_bar.addStretch()
         
         main_layout.addLayout(top_bar)
         
         # Title
         title_label = QLabel("Past Sessions")
+        title_label.setFont(text_font)
         title_label.setAlignment(Qt.AlignCenter)
         title_label.setStyleSheet("font-size: 24px; font-weight: bold; margin: 10px;")
         main_layout.addWidget(title_label)
         
+        # Horizontal layout to center scroll area
+        h_layout = QHBoxLayout()
+        h_layout.addStretch(1)
+        
         # Scroll area for sessions
         scroll_area = QScrollArea()
+        scroll_area.setFixedWidth(350)
         scroll_area.setWidgetResizable(True)
         scroll_area.setFrameShape(QFrame.NoFrame)
         
@@ -52,14 +105,22 @@ class HistoryView(QWidget):
         self.sessions_layout.setSpacing(10)
         
         scroll_area.setWidget(container)
-        main_layout.addWidget(scroll_area)
+        h_layout.addWidget(scroll_area)
+        h_layout.addStretch(1)
+        
+        main_layout.addLayout(h_layout)
 
     def add_session_link(self, timestamp, session_data):
         """Add a clickable link for a session"""
-        button = QPushButton(timestamp)
+        text_font = QFont("Menlo")
+        label = session_data.get('qualitative_label', '')
+        button_text = f"{timestamp}\n{label}"
+        button = QPushButton(button_text)
+        button.setFont(text_font)
+        button.setCursor(Qt.PointingHandCursor)
         button.setStyleSheet("""
             QPushButton {
-                text-align: left;
+                text-align: center;
                 padding: 15px;
                 font-size: 16px;
                 background-color: #434343;
