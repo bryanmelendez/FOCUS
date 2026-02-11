@@ -100,7 +100,8 @@ class HistoryController:
                 session = {timestamp: dict(row)}
                 sessions_list.append(session)
 
-        return sessions_list
+        # Reverse the list to show newest entries first
+        return list(reversed(sessions_list))
 
     def get_session(self, session: dict) -> StatsWindowModel:
         """Convert a session dict to a StatsWindowModel"""
