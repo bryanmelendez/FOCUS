@@ -97,6 +97,7 @@ class FacialImagingWorker(QObject):
 
     def end_session(self):
         landmark_processor = self.model.landmark_processor
+        landmark_processor.finalize()
         landmark_processor.print_stats()
         total_time, att_pct, inatt_pct = landmark_processor.SoA_percentages()
         label = landmark_processor.qualitative_label()

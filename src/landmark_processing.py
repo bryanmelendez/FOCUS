@@ -341,9 +341,10 @@ class LandmarkProcessor:
 
     def estimateSoA(self, EAR, PERCLOS, YF, GD, head_pose):
         # determine state of attention *** CHANGE THRESHOLDS ***
-
+        if self.currentState == state.PAUSED:
+            return self.currentState
+        
         soa = None
-
         current_time = time.time()
 
         yaw = abs(head_pose["yaw"])
@@ -402,43 +403,54 @@ class LandmarkProcessor:
         if self.state_start_time is None:
             self.state_start_time = current_time
             longest_attentive_streak_start = current_time
-            self.SoA_history.append((0, self.currentState))
+            #self.SoA_history.append((0, self.currentState))
 
         # DEBUG
         # print("current state: {}".format(currentSoA))
         # print("prev state: {}".format(self.prevState))
 
         # if state changed, reset timer
-        if currentSoA != self.prevState:
-            self.state_start_time = current_time
-            self.prevState = currentSoA
+        # if currentSoA != self.prevState:
+        #     self.state_start_time = current_time
+        #     self.prevState = currentSoA
 
         duration = current_time - self.state_start_time
 
         if currentSoA == state.INATTENTIVE and duration > self.inattentive_alert_time:
             if self.inattentive_flag == False:
-                # self.longest_attentive_streak = max(self.longest_attentive_streak, (current_time - longest_attentive_streak_start))
                 self.inattentive_flag = True
                 self.inattentive_count += 1
-                # self.SoA_history.append((current_time, currentSoA))
                 self.logger.info("INATTENTIVE ALERT")
         elif currentSoA == state.ATTENTIVE:
-            # if self.inattentive_flag == True:
             self.inattentive_flag = False
-            #     self.SoA_history.append((current_time, currentSoA))
 
         return results, currentSoA
     
     def pause(self):
+        # store last state
+        current_time = time.time()
+        duration = current_time - self.state_start_time
+        self.SoA_history.append((duration, self.currentState))
+        # update state to be PAUSED
+        self.prevState = self.currentState
         self.currentState = state.PAUSED
-        self.paused_time = time.time()
+        self.state_start_time = time.time()
 
     def resume(self):
         end_time = time.time()
-        pause_duration = end_time - self.paused_time
+        pause_duration = end_time - self.state_start_time
         self.SoA_history.append((pause_duration, self.currentState))
-        self.state_start_time = end_time
+        # update state
+        self.prevState = self.currentState
         self.currentState = state.ATTENTIVE
+        self.state_start_time = end_time
+
+    def finalize(self):
+        end_time = time.time()
+        duration = end_time - self.state_start_time
+
+        self.SoA_history.append((duration, self.currentState))
+        self.state_start_time = None
     
     def SoA_percentages(self):
         attentive_time = 0
