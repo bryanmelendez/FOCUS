@@ -25,18 +25,6 @@ RIGHT_EYE_LIDS    = [386, 374]
 LEFT_EYE_OUTLINE  = [33, 7, 163, 144, 145, 153, 154, 155, 133, 173, 157, 158, 159, 160, 161, 246]
 RIGHT_EYE_OUTLINE = [362, 382, 381, 380, 374, 373, 390, 249, 263, 466, 388, 387, 386, 385, 384, 398]
 
-# TODO - change these to the new angle classification system
-# Angular Thresholds
-CENTER_ANGLE   = 30    # ±30° → center
-LEFT_ANGLE_MIN = 135   # beyond ±135° → left
-LEFT_ANGLE_MAX = 180
-RIGHT_ANGLE_MIN = -180 # or +180 
-RIGHT_ANGLE_MAX = -135
-UP_ANGLE_MIN    = -135
-UP_ANGLE_MAX    = -45
-DOWN_ANGLE_MIN  = 45
-DOWN_ANGLE_MAX  = 135
-
 def relative(landmark, frame_shape):
     h, w = frame_shape[:2]
     return (int(landmark.x * w), int(landmark.y * h))
@@ -192,7 +180,6 @@ class LandmarkProcessor:
         return yawn_freq
 
     def compute_head_pose(self, landmarks, frame_shape):
-        # todo
         h, w, _ = frame_shape
 
         #approximate 3D coordinates of the human head

@@ -1,4 +1,3 @@
-# TODO make sure we actually use all of these imports
 import mediapipe as mp
 from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
@@ -7,7 +6,7 @@ from mediapipe.framework.formats import landmark_pb2
 import cv2
 import numpy as np
 
-class FaceDetector: # TODO reanme this because it conflicts with mediapipe FaceDetector
+class FaceDetector:
     def __init__(self):
         self.detection_model_path = 'models/blaze_face_short_range.tflite'
         self.landmark_model_path = 'models/face_landmarker.task'

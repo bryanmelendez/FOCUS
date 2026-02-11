@@ -55,7 +55,6 @@ class FacialImagingWorker(QObject):
         self.finished.emit()
 
     def initialize_imaging(self):
-        # TODO - initialize this properly
         if self.model.cap is None:
             self.model.cap = cv2.VideoCapture(0)
 
