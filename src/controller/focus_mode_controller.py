@@ -23,8 +23,8 @@ class FocusController:
 
         # Connect view signals → controller logic
         self.view.toggle_clicked.connect(self.handle_start_toggle)
-        self.view.end_clicked.connect(self.handle_end)  
-        self.view.home_button.clicked.connect(self.handle_end)
+        self.view.end_clicked.connect(lambda: self.handle_end(show_stats=True))  
+        self.view.home_clicked.connect(self.handle_home)
         self.view.settings_clicked.connect(self.open_settings)
         self.view.mode_changed.connect(self.change_mode)
         self.view.skip_button.clicked.connect(self.handle_skip)
@@ -55,7 +55,14 @@ class FocusController:
         else:
             self.start()
 
-    def handle_end(self):
+    def handle_home(self):
+        """Handle home button click - end session if active, then let view emit home_clicked"""
+        if self.model.has_started:
+            # Session is active, end it without showing stats
+            self.handle_end(show_stats=False)
+        # View will emit home_clicked signal which MainWindow listens to
+
+    def handle_end(self, show_stats=True):
         self.timer.stop()
  
         if self.model.mode == "work":
@@ -73,7 +80,7 @@ class FocusController:
         self.reset_current_mode()
         self.sync_view()
 
-        self.face_controller.end_session()
+        self.face_controller.end_session(show_stats=show_stats)
 
     def start(self):
         # Prevent starting if already running
@@ -137,9 +144,11 @@ class FocusController:
                 f"FOCUS {mode_name} Complete",
                 f"Your {mode_name.lower()} session is finished!"
             )
-    
 
-
+            if self.model.mode == "work":
+                self.change_mode(mode="break")
+            else:
+                self.change_mode(mode="work")
 
     def open_settings(self):
         dialog = FocusSettingsDialog(

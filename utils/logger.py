@@ -12,24 +12,14 @@ class Logger:
     }
 
     def __init__(self):
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-
-        self.log_path = f"logs/{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}"
-        self.log_file = f"{self.log_path}/execution.log"
-        os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
+        pass
 
     def log(self, message, color=None):
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # terminal output
         colored_message = f"{self.COLORS[color]}{message}{self.COLORS['RESET']}" if color else message
-        # log output
-        log_entry = f"[{timestamp}] {message}\n"
 
         print(f"[{timestamp}] {colored_message}")
-
-        with open(self.log_file, 'a') as f:
-            f.write(log_entry)
 
     def info(self, message):
         self.log(f"INFO: {message}", "GREEN")
