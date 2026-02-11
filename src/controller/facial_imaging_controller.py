@@ -96,6 +96,7 @@ class FacialImagingWorker(QObject):
 
     def end_session(self, show_stats=True):
         landmark_processor = self.model.landmark_processor
+        landmark_processor.finalize()
         landmark_processor.print_stats()
         
         if show_stats:
