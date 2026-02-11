@@ -14,11 +14,11 @@ class FacialImagingWorker(QObject):
     data_ready = Signal(object)
     finished = Signal()
 
-    def __init__(self):
+    def __init__(self, notification_manager=None):
         super().__init__()
         self._running = False
 
-        self.model = FacialImagingModel()
+        self.model = FacialImagingModel(notification_manager)
         self.logger = Logger()
         self.history_controller = HistoryController()
         
@@ -124,15 +124,16 @@ class FacialImagingWorker(QObject):
         
     def restart_landmark_processor(self):
         old_processor = self.model.landmark_processor
-        self.model.landmark_processor = old_processor.__class__()
+        notification_manager = old_processor.notification_manager
+        self.model.landmark_processor = old_processor.__class__(notification_manager)
         del old_processor
                 
 class FacialImagingController(QObject):
-    def __init__(self):
+    def __init__(self, notification_manager=None):
         super().__init__()
 
         self.worker_thread = QThread()
-        self.worker = FacialImagingWorker()
+        self.worker = FacialImagingWorker(notification_manager)
 
         self.worker.moveToThread(self.worker_thread)
 

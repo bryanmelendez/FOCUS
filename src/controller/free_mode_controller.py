@@ -6,8 +6,8 @@ from utils.notification import NotificationManager
 
 class FreeModeController:
     def __init__(self, model, view):
-        self.face_controller = FacialImagingController()
         self.notification_manager = NotificationManager()
+        self.face_controller = FacialImagingController(self.notification_manager)
 
         self.model = model
         self.view = view
@@ -70,12 +70,6 @@ class FreeModeController:
         self.timer.start()
 
         self.face_controller.start()
-        
-        # Show notification
-        self.notification_manager.show_notification(
-            "Focus Session Started",
-            "Your focus session has begun. Stay concentrated!"
-        )
 
         # Tell the view to update the button text
         self.view.set_running(True)

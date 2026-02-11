@@ -58,8 +58,9 @@ def rotation_matrix_to_angles(rotation_matrix):
     return np.array([x, y, z])
 
 class LandmarkProcessor:
-    def __init__(self):
+    def __init__(self, notification_manager=None):
         self.logger = Logger()
+        self.notification_manager = notification_manager
         self.funct_time = 60 # second *** REMEMBER TO CHANGE !!! ***
         # EAR values
         self.closed_start_time = None
@@ -421,6 +422,13 @@ class LandmarkProcessor:
                 self.inattentive_flag = True
                 self.inattentive_count += 1
                 self.logger.info("INATTENTIVE ALERT")
+                # Send notification to user
+                if self.notification_manager:
+                    self.notification_manager.show_notification(
+                        "Focus Alert",
+                        "You appear to be inattentive. Please refocus on your work!",
+                        duration=5000
+                    )
         elif currentSoA == state.ATTENTIVE:
             self.inattentive_flag = False
 

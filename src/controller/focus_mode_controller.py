@@ -6,8 +6,8 @@ from utils.notification import NotificationManager
 
 class FocusController:
     def __init__(self, model, view):
-        self.face_controller = FacialImagingController()
         self.notification_manager = NotificationManager()
+        self.face_controller = FacialImagingController(self.notification_manager)
         
         # Store references to model and view
         self.model = model
@@ -93,13 +93,6 @@ class FocusController:
 
         if self.model.mode == "work":
             self.face_controller.start()
-        
-        # Show notification
-        mode_name = "Focus" if self.model.mode == "work" else "Break"
-        self.notification_manager.show_notification(
-            f"FOCUS {mode_name} Started",
-            f"Your {mode_name.lower()} session has begun!"
-        )
 
         # Tell the view to update the button text
         self.view.update_controls(self.model.is_running, self.model.has_started)
