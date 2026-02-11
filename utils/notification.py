@@ -24,10 +24,6 @@ class NotificationManager:
         # Create a system tray icon
         self.tray_icon = QSystemTrayIcon(self.app)
         
-        # Set an icon if you have one (optional)
-        # icon = QIcon("path/to/your/icon.png")
-        # self.tray_icon.setIcon(icon)
-        
         # Make the tray icon visible
         self.tray_icon.setVisible(True)
     

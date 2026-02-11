@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import QMainWindow, QStackedWidget
+from PySide6.QtGui import QIcon
 from src.gui.focus_view import FocusView
 from gui.free_mode_view import FreeTimerView
 from src.gui.history_view import HistoryView
@@ -10,6 +11,7 @@ class MainWindow(QMainWindow):
         self.controller = app_controller
 
         self.setWindowTitle("FOCUS")
+        self.setWindowIcon(QIcon("assets/focus_logo.png"))
 
         self.home_page = HomePage()
         self.focus_view = FocusView()

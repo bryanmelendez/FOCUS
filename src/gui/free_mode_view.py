@@ -77,8 +77,8 @@ class FreeTimerView(QWidget):
         self.logo_button = QPushButton()
         self.logo_button.setCursor(Qt.PointingHandCursor)
 
-        pixmap = QPixmap("assets/pokemon.png").scaled(
-            48, 48, 
+        pixmap = QPixmap("assets/focus_logo.png").scaled(
+            80, 80, 
             Qt.KeepAspectRatio, 
             Qt.SmoothTransformation
             )
