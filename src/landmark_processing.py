@@ -11,7 +11,6 @@ class state(Enum):
     INATTENTIVE = 1
     ATTENTIVE = 2
     PAUSED = 3
-    PAUSED = 3
 
 # Gaze Landmarks
 LEFT_IRIS        = [468, 469, 470, 471, 472]
