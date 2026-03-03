@@ -13,7 +13,7 @@ from utils.logger import Logger
 
 model_path = 'models/face_landmarker.task'
 
-IMAGE_PATH = 'images/matthew.jpg'
+IMAGE_PATH = 'poster_images/neet4.jpg'
 
 def draw_landmarks_on_image(rgb_image, detection_result):
   face_landmarks_list = detection_result.face_landmarks
@@ -105,13 +105,13 @@ yawn_freq = landmark_processor.compute_yawn_freq(face_landmarks)
 print(f"Yawn Frequency: {yawn_freq} yawns/min")
 
 if head_pose:
-    logger.info(f"Pitch: {head_pose['pitch']:.2f}, "
+    print(f"Pitch: {head_pose['pitch']:.2f}, "
           f"Yaw: {head_pose['yaw']:.2f}, "
           f"Roll: {head_pose['roll']:.2f}")
         
 if gaze:
-    logger.info(f"Left Eye Angle: {gaze[0]:.2f}, "
+    print(f"Left Eye Angle: {gaze[0]:.2f}, "
           f"Right Eye Angle: {gaze[1]:.2f}")
-    logger.info(f"Left Eye Gaze Direction: {gaze[2]}, "
+    print(f"Left Eye Gaze Direction: {gaze[2]}, "
           f"Right Eye Gaze Direction: {gaze[3]}")
     
